@@ -7,3 +7,24 @@ project ("SecondWife")
 
 # 包含子项目。
 add_subdirectory ("game_server")
+
+# specify the C++ standard 
+set(CMAKE_CXX_STANDARD 14) 
+set(CMAKE_CXX_STANDARD_REQUIRED ON) 
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+message("hello")
+message(${CMAKE_CURRENT_SOURCE_DIR})
+message(${CMAKE_SOURCE_DIR})
+message("hello")
+
+# includes
+target_include_directories(
+	"game_server" PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/mtl
+	${CMAKE_CURRENT_SOURCE_DIR}/include/log
+	${CMAKE_CURRENT_SOURCE_DIR}/include/common
+)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_definitions(-DXLOCALE_NOT_USED)
