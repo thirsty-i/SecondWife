@@ -11,7 +11,7 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
-      "wslPath": "C:\\Users\\zhongzihao\\AppData\\Local\\Microsoft\\WindowsApps\\ubuntu.exe"
+      "wslPath": "${defaultWSLPath}"
     },
     {
       "name": "WSL-GCC-Release",
@@ -24,7 +24,7 @@
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
-      "wslPath": "C:\\Users\\zhongzihao\\AppData\\Local\\Microsoft\\WindowsApps\\ubuntu.exe"
+      "wslPath": "${defaultWSLPath}"
     },
     {
       "name": "x64-Debug",
@@ -35,8 +35,7 @@
       "cmakeCommandArgs": "",
       "buildCommandArgs": "",
       "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
-      "variables": []
+      "inheritEnvironments": [ "msvc_x64_x64" ]
     }
   ]
 }

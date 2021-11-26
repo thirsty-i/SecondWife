@@ -1,41 +1,39 @@
 #ifndef _HPP_DELEGATE_HPP_
 #define _HPP_DELEGATE_HPP_
 
-#include <list>
+#include <vector>
 #include <functional>
 #include <utility>
 
 namespace mtl {
-	template <class T>
+	template<class _Signature>
+	class CDelegate;
+
+	template <class _Ref, class... _Types>
 	class CDelegate	final
 	{
 	public:
+		typedef std::function<void(_Types...)> functor_type;
+		
 		~CDelegate()
 		{
-			m_lst.clear();
+			functors_.clear();
 		}
 
-		void operator+(std::function<T> func)
+		void register_to(functor_type&& func)
 		{
-			m_lst.push_back(func);
+			functors_.push_back(std::forward<functor_type>(func));
 		}
 
-		CDelegate& operator+=(std::function<T> func)
-		{
-			m_lst.push_back(func);
-			return *this;
-		}
-
-		template <class... _Types >
 		void Invoke(_Types&&... args)
 		{
-			for (auto func : m_lst)
+			for (const functor_type& func : functors_)
 			{
 				(func)(std::forward<_Types>(args)...);
 			}
 		}
 	private:
-		std::list<std::function<T>> m_lst;
+		std::vector<functor_type> functors_;
 	};
 };
 #endif // _HPP_DELEGATE_HPP_
