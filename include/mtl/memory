@@ -1,9 +1,0 @@
-#ifndef _H_MEMORY_H_
-#define _H_MEMORY_H_
-
-
-#include "memorymgr/allocator.h"
-
-// TODO: other allocator
-
-#endif // _H_MEMORY_H_

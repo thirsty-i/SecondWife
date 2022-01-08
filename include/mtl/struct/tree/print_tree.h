@@ -8,46 +8,57 @@ using std::cout;
 using std::string;
 using std::endl;
 
-static string strTree;
+static string str_tree;
 
 template <class NodePtr>
 class CPrintBTree
 {
+	static string data_str(NodePtr node)
+	{
+		 return 
+			 std::to_string(node->value.first)
+			 + "|" 
+			 + (std::to_string(node->value.second)
+			 + "|" 
+			 + ((bool)node->color ? "B" : "R"));
+	}
+
 	static void horizontalStyle(NodePtr root, bool isRight, string indent)
     {
-		if (root->pRight != 0) {
-			horizontalStyle(root->Right(), true, indent + (isRight ? "        " : " |      "));
+		if (root->node_right() != 0) {
+			horizontalStyle(root->node_right(), true, indent + (isRight ? "        " : " |      "));
 		}
-		strTree += indent;
-		strTree += isRight ? " /" : " \\";
-		strTree += "----- ";
-		strTree += (std::to_string(root->value.first) + "|" + ((bool)root->bColor ? "B" : "R"));
-		strTree += "\n";
+		str_tree += indent;
+		str_tree += isRight ? " /" : " \\";
+		str_tree += "----- ";
+		str_tree += data_str(root);
+		str_tree += "\n";
 		
-		if (root->pLeft != 0) {
-			horizontalStyle(root->Left(), false, indent + (isRight ? " |      " : "        "));
+		if (root->node_left() != 0) {
+			horizontalStyle(root->node_left(), false, indent + (isRight ? " |      " : "        "));
 		}
     }
 
 public:
-	static void Print(NodePtr root)
+	static void print(NodePtr root)
     {
-		strTree.clear();
+		str_tree.clear();
 
 		if (!root)
 			return;
 
-		if (root->pRight != 0) {
-			horizontalStyle(root->Right(), true, "");
+		if (root->node_right() != 0) {
+			horizontalStyle(root->node_right(), true, "");
 		}
 
-        strTree += (std::to_string(root->value.first) + "|" + ((bool)root->bColor ? "B" : "R") + "\n");
+        str_tree += data_str(root);
+		str_tree += '\n';
 
-		if (root->pLeft != 0) {
-			horizontalStyle(root->Left(), false, "");
+		if (root->node_left() != 0) {
+			horizontalStyle(root->node_left(), false, "");
 		}
 
-        cout << strTree << endl;
+        cout << str_tree << endl;
     }
 
 };

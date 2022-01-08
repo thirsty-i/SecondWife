@@ -1,7 +1,6 @@
 #ifndef _H_CIRCLE_BUFFER_H_
 #define _H_CIRCLE_BUFFER_H_
 
-#include "type_int.h"
 #include "allocator.h"
 #include "bitops.h"
 #include "log.h"
@@ -10,136 +9,89 @@
 
 namespace mtl
 {
-	enum class CircleBufferLock
-	{
-		cblSingleWriteSingleRead,
-		cblSingleWriteMutilRead,
-		cblMutilWriteSingleRead,
-		cblMutilWriteMutilRead,
-	};
-
-	template <CircleBufferLock>
-	struct _CircleBufferLockTraits // cblSingleWriteSingleRead
-	{
-		using WLock = CNullLock;
-		using RLock = CNullLock;
-	};
-
-	template <>
-	struct _CircleBufferLockTraits<CircleBufferLock::cblSingleWriteMutilRead>
-	{
-		using WLock = CNullLock;
-		using RLock = CSpinLock;
-	};
-
-	template <>
-	struct _CircleBufferLockTraits<CircleBufferLock::cblMutilWriteSingleRead>
-	{
-		using WLock = CSpinLock;
-		using RLock = CNullLock;
-	};
-
-	template <>
-	struct _CircleBufferLockTraits<CircleBufferLock::cblMutilWriteMutilRead>
-	{
-		using WLock = CSpinLock;
-		using RLock = CSpinLock;
-	};
-
-
-	template <CircleBufferLock LockModel>
-	class CCircleBuffer
+	class ring_buffer final
 	{
 	public:
-		using value_type = BYTE;
+		using value_type = char;
+		using size_type = size_t;
+
 		using pointer = value_type*;
-		using size_type = UINT32;
 		using void_pointer = void*;
 
-		using LockTraits = _CircleBufferLockTraits<LockModel>;
-
-		using read_lock_type = typename LockTraits::RLock;
-		using write_lock_type = typename LockTraits::WLock;
-
-		CCircleBuffer()
+		ring_buffer()
 		{
-			Reset(0, 0);
+			reset(0, 0);
 		}
 
-		CCircleBuffer(void_pointer pBuffer, const size_type dwSize)
-			: m_Capacity(RoundupPowOf2(dwSize))
+		ring_buffer(void_pointer buffer, const size_type size)
+			: capacity_(round_up_pow_of_2(size))
 		{
-			assert(m_Capacity >= 2);
-			Reset(pBuffer, dwSize);
+			assert(capacity_ >= 2);
+			reset(buffer, size);
 		}
 
-		~CCircleBuffer() = default;
+		~ring_buffer() = default;
 
-		void Reset(pointer pBuffer, const size_type dwSize)
+		void reset(pointer buffer, const size_type size)
 		{
-			m_pBuffer = pBuffer;
-			m_dwIn = m_dwOut = 0;
-			m_Capacity = dwSize;
+			buffer_ = buffer;
+			in_ = out_ = 0;
+			capacity_ = size;
 		}
 
-		size_type Read(pointer pDst, size_type dwLen)
+		size_type read(pointer dst, size_type len)
 		{
-			CLockGuard<read_lock_type> oLockGuard(m_ReadLock);
-			
-			UINT32 dwUsed = Used();
-			if (dwLen > dwUsed)
-				dwLen = dwUsed;
+			int32_t used = used();
+			if (len > used)
+				len = used;
 
-			_CopyOut(pDst, dwLen);
-			m_dwOut += dwLen;
+			_copy_out(dst, len);
+			out_ += len;
 
-			return dwLen;
+			return len;
 		}
 
-		size_type Write(pointer pSrc, size_type dwLen)
+		size_type write(pointer src, size_type len)
 		{
-			CLockGuard<write_lock_type> oLockGuard(m_WriteLock);
+			int32_t unused = unused();
+			if (len > unused)
+				len = unused;
 
-			UINT32 dwUnUsed = UnUsed();
-			if (dwLen > dwUnUsed)
-				dwLen = dwUnUsed;
+			_copy_in(src, len);
+			in_ += len;
 
-			_CopyIn(pSrc, dwLen);
-			m_dwIn += dwLen;
-
-			return dwLen;
+			return len;
 		}
 
 		/*Push and Pop*/
-		size_type UnUsed() { return m_Capacity - (m_dwIn - m_dwOut); }
-		size_type Used() { return m_dwIn - m_dwOut; }
+		size_type unused() { return capacity_ - (in_ - out_); }
+		size_type used() { return in_ - out_; }
 
-		void _CopyIn(pointer pSrc, size_type dwLen)
+		void _copy_in(pointer src, size_type len)
 		{
-			UINT32 dwOff = m_dwIn & (m_Capacity - 1);
-			UINT32 dwCopyLen = min(dwLen, m_Capacity - dwOff);
+			int32_t off = in_ & (capacity_ - 1);
+			int32_t copy_len = min(len, capacity_ - off);
 
-			memcpy(m_pBuffer + dwOff, pSrc, dwCopyLen);
-			memcpy(m_pBuffer, pSrc + dwCopyLen, (dwLen - dwCopyLen));
+			memcpy(buffer_ + off, src, copy_len);
+			memcpy(buffer_, src + copy_len, (len - copy_len));
 		}
 
-		void _CopyOut(pointer pDst, size_type dwLen)
+		void _copy_out(pointer dst, size_type len)
 		{
-			UINT32 dwOff = m_dwOut & (m_Capacity - 1);
-			UINT32 dwCopyLen = min(dwLen, m_Capacity - dwOff);
+			int32_t off = out_ & (capacity_ - 1);
+			int32_t copy_len = min(len, capacity_ - off);
 
-			memcpy(pDst, m_pBuffer + dwOff, dwCopyLen);
-			memcpy(pDst + dwCopyLen, m_pBuffer, dwLen - dwCopyLen);
+			memcpy(dst, buffer_ + off, copy_len);
+			memcpy(dst + copy_len, buffer_, len - copy_len);
 		}
 
 	private:
-		read_lock_type m_ReadLock;
-		write_lock_type m_WriteLock;
+		size_type capacity_; 
 
-		size_type m_Capacity;  /* Maximum capacity is 2^31 */   
-		volatile size_type m_dwIn;
-		volatile size_type m_dwOut;
-		pointer m_pBuffer;
+		/*modify atomic*/
+		alignas(64) size_type in_;
+		alignas(64) size_type out_;
+		pointer buffer_;
 	};
 
 }

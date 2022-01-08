@@ -1,27 +1,37 @@
 #ifndef _HPP_SPIN_LOCK_HPP_
 #define _HPP_SPIN_LOCK_HPP_
 
+#include "common/noncopyable.h"
 #include <atomic>
 
-class CSpinLock
+class spin_lock
+	: private noncopyable
 {
-private:
-	typedef enum { Locked, Unlocked } LockState;
-	std::atomic<LockState> m_State;
-
 public:
-	CSpinLock() : m_State(Unlocked) {};
-
-	void Lock()
+	bool try_lock()
 	{
-		while (m_State.exchange(Locked, std::memory_order_acquire) == Locked) {
-			/* busy-wait */
+		return !lock_.load(std::memory_order_relaxed)
+			&& !lock_.exchange(true, std::memory_order_acquire);
+	}
+
+	void lock()
+	{
+		if (!lock_.exchange(true, std::memory_order_acquire)) {
+			return;
+		}
+
+		while (lock_.load(std::memory_order_relaxed)) {
+			/*busy waiting*/
 		}
 	}
-	void UnLock()
+
+	void unlock()
 	{
-		m_State.store(Unlocked, std::memory_order_release);
+		lock_.store(false, std::memory_order_release);
 	}
+
+private:
+	std::atomic<bool> lock_ = { false };
 };
 
 #endif // _HPP_SPIN_LOCK_HPP_

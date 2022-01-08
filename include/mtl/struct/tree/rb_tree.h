@@ -16,27 +16,22 @@ namespace mtl
 
 		_Rb_tree_node_base()
 		{
-			pParent = pLeft = pRight = 0;
-			bColor = _Rb_tree_color::rbtcRed;
+			parent = left = right = 0;
+			color = _Rb_tree_color::rbtcRed;
 		}
 
-		_Rb_tree_color& color(void)
+		void clone(node_base_ptr node)
 		{
-			return bColor;
+			node->parent = parent;
+			node->left = left;
+			node->right = right;
+			node->color = color;
 		}
 
-		void clone(node_base_ptr pNode)
-		{
-			pNode->pParent = pParent;
-			pNode->pLeft = pLeft;
-			pNode->pRight = pRight;
-			pNode->bColor = bColor;
-		}
-
-		node_base_ptr pParent;
-		node_base_ptr pLeft;
-		node_base_ptr pRight;
-		_Rb_tree_color bColor;
+		node_base_ptr parent;
+		node_base_ptr left;
+		node_base_ptr right;
+		_Rb_tree_color color;
 	};
 
 	template <typename _Value>
@@ -49,19 +44,19 @@ namespace mtl
 		_Rb_tree_node(value_type& value) : _Rb_tree_node_base(), value(value) {}
 		_Rb_tree_node(value_type&& value) : _Rb_tree_node_base(), value(value) {}
 
-		node_ptr& left()
+		node_ptr& node_left()
 		{
-			return (node_ptr&)pLeft;
+			return (node_ptr&)left;
 		}
 
-		node_ptr& right()
+		node_ptr& node_right()
 		{
-			return (node_ptr&)pRight;
+			return (node_ptr&)right;
 		}
 
-		node_ptr& parent()
+		node_ptr& node_parent()
 		{
-			return (node_ptr&)pParent;
+			return (node_ptr&)parent;
 		}
 
 		value_type value;
@@ -81,15 +76,15 @@ namespace mtl
 		typedef _Rb_tree_node<value_type>* Rb_tree_node_ptr;
 
 
-		_Rb_tree_iterator() : pNode() {}
-		_Rb_tree_iterator(Rb_tree_node_base_ptr pBasePtr) : pNode(pBasePtr) {}
-		_Rb_tree_iterator(Rb_tree_node_ptr pNodePtr) : pNode(pNodePtr) {}
+		_Rb_tree_iterator() : node() {}
+		_Rb_tree_iterator(Rb_tree_node_base_ptr pBasePtr) : node(pBasePtr) {}
+		_Rb_tree_iterator(Rb_tree_node_ptr pNodePtr) : node(pNodePtr) {}
 
-		Rb_tree_node_base_ptr pNode;
+		Rb_tree_node_base_ptr node;
 
 		reference operator*()
 		{
-			return static_cast<Rb_tree_node_ptr>(pNode)->value;
+			return static_cast<Rb_tree_node_ptr>(node)->value;
 		}
 
 		pointer operator->()
@@ -99,37 +94,37 @@ namespace mtl
 
 		self& operator++()
 		{
-			pNode = _Bs_tree<Rb_tree_node_base_ptr>::successor(pNode);
+			node = _Bs_tree<Rb_tree_node_base_ptr>::successor(node);
 			return *this;
 		}
 
 		self operator++(int)
 		{
 			self _tmp = *this;
-			pNode = _Bs_tree<Rb_tree_node_base_ptr>::successor(pNode);
+			++* this;
 			return _tmp;
 		}
 
 		self& operator--()
 		{
-			pNode = _Bs_tree<Rb_tree_node_base_ptr>::predecessor(pNode);
+			node = _Bs_tree<Rb_tree_node_base_ptr>::predecessor(node);
 			return *this;
 		}
 
 		self operator--(int)
 		{
 			self _tmp = *this;
-			pNode = _Bs_tree<Rb_tree_node_base_ptr>::predecessor(pNode);
+			--* this;
 			return _tmp;
 		}
 
 		self& operator=(self iter) {  
-			pNode = iter.pNode; 
+			node = iter.node; 
 			return *this;
 		}
 
-		friend bool operator==(const self& first, const self& second) { return first.pNode == second.pNode; }
-		friend bool operator!=(const self& first, const self& second) { return first.pNode != second.pNode; }
+		friend bool operator==(const self& first, const self& second) { return first.node == second.node; }
+		friend bool operator!=(const self& first, const self& second) { return first.node != second.node; }
 	};
 
 	template <class _Key, class _Value, class _Compare, class _Alloc>
@@ -159,390 +154,389 @@ namespace mtl
 	protected:
 		node_ptr _get_node(const_reference value)
 		{
-			node_ptr pNode = m_node_allocator_.allocate(1);
-			m_node_allocator_.construct(pNode, value);
+			node_ptr node = node_allocator_.allocate(1);
+			node_allocator_.construct(node, value);
 
-			return pNode;
+			return node;
 		}
 
-		void _put_node(node_ptr pNode)
+		void _put_node(node_ptr node)
 		{
-			m_node_allocator_.destroy(pNode);
-			m_node_allocator_.deallocate(pNode);
+			node_allocator_.destroy(node);
+			node_allocator_.deallocate(node);
 		}
 
 		iterator _find(key_type& key)
 		{
-			node_ptr pNode = (node_ptr)_root();
+			node_ptr node = (node_ptr)_root();
 
-			while (pNode)
+			while (node)
 			{
-				if (m_compare_(key, pNode->value))
-					pNode = pNode->left();
-				else if (m_compare_(pNode->value, key))
-					pNode = pNode->right();
+				if (compare_(key, node->value))
+					node = node->node_left();
+				else if (compare_(node->value, key))
+					node = node->node_right();
 				else
-					return iterator(pNode);
-
+					return iterator(node);
 			}
 
 			return end();
 		}
 
-		base_ptr& _root() { return m_head_.pParent; }
+		base_ptr& _root() { return head_.parent; }
 
-		base_ptr& _left_most() { return m_head_.pLeft; }
+		base_ptr& _left_most() { return head_.left; }
 
-		base_ptr& _right_most() { return m_head_.pRight; }
+		base_ptr& _right_most() { return head_.right; }
 
-		base_ptr _uncle(base_ptr pNode)
+		base_ptr _uncle(base_ptr node)
 		{
-			if (pNode == _root())
+			if (node == _root())
 				return 0;
 
-			if (pNode->pParent == _root())
+			if (node->parent == _root())
 				return 0;
 
-			base_ptr pParent = pNode->pParent;
-			if (pParent == _root())
+			base_ptr parent = node->parent;
+			if (parent == _root())
 				return 0;
 
 			
-			return (pParent == pParent->pParent->pLeft) ?
-				pParent->pParent->pRight :
-				pParent->pParent->pLeft;
+			return (parent == parent->parent->left) ?
+				parent->parent->right :
+				parent->parent->left;
 		}
 
-		base_ptr _brother(base_ptr pNode)
+		base_ptr _brother(base_ptr node)
 		{
-			if (pNode == _root())
+			if (node == _root())
 				return 0;
 
-			if (pNode->pParent->pLeft == pNode)
-				return pNode->pParent->pRight;
+			if (node->parent->left == node)
+				return node->parent->right;
 			else
-				return pNode->pParent->pLeft;
+				return node->parent->left;
 		}
 
-		int _get_black_count(base_ptr pNode)
+		int _get_black_count(base_ptr node)
 		{
-			int nCount = 0;
+			int count = 0;
 
-			while (pNode != _root())
+			while (node != _root())
 			{
-				if (pNode->bColor == _Rb_tree_color::rbtcBlack)
-					++nCount;
-				pNode = pNode->pParent; 
+				if (node->color == _Rb_tree_color::rbtcBlack)
+					++count;
+				node = node->parent; 
 			}
-			return ++nCount;
+			return ++count;
 		}
 
-		void _rotate_left(base_ptr  pNode)
+		void _rotate_left(base_ptr  node)
 		{
-			base_ptr pChild = pNode->pRight;
-			pNode->pRight = pChild->pLeft;
+			base_ptr child = node->right;
+			node->right = child->left;
 
-			if (pChild->pLeft)
-				pChild->pLeft->pParent = pNode;
+			if (child->left)
+				child->left->parent = node;
 
-			pChild->pParent = pNode->pParent;
+			child->parent = node->parent;
 
-			if (_root() == pNode)
-				_root() = pChild;
-			else if (pNode == pNode->pParent->pLeft)
-				pNode->pParent->pLeft = pChild;
-			else //  pNode == pNode->pParent->pRight
-				pNode->pParent->pRight = pChild;
+			if (_root() == node)
+				_root() = child;
+			else if (node == node->parent->left)
+				node->parent->left = child;
+			else //  node == node->parent->pRight
+				node->parent->right = child;
 
-			pNode->pParent = pChild;
-			pChild->pLeft = pNode;
+			node->parent = child;
+			child->left = node;
 		}
 
-		void _rotate_right(base_ptr pNode)
+		void _rotate_right(base_ptr node)
 		{
-			base_ptr pChild = pNode->pLeft;
-			pNode->pLeft = pChild->pRight;
+			base_ptr child = node->left;
+			node->left = child->right;
 
-			if (pChild->pRight)
-				pChild->pRight->pParent = pNode;
+			if (child->right)
+				child->right->parent = node;
 
-			pChild->pParent = pNode->pParent;
+			child->parent = node->parent;
 
-			if (_root() == pNode)
-				_root() = pChild;
-			else if (pNode == pNode->pParent->pLeft)
-				pNode->pParent->pLeft = pChild;
-			else // pNode == pNode->pParent->pRight
-				pNode->pParent->pRight = pChild;
+			if (_root() == node)
+				_root() = child;
+			else if (node == node->parent->left)
+				node->parent->left = child;
+			else // node == node->parent->pRight
+				node->parent->right = child;
 
-			pNode->pParent = pChild;
-			pChild->pRight = pNode;
+			node->parent = child;
+			child->right = node;
 		}
 
-		void _rebalance(base_ptr pNode)
+		void _rebalance(base_ptr node)
 		{
-			base_ptr pUncle = 0;
-			base_ptr pGrandParent = 0;
-			base_ptr pParent = 0;
-			pNode->color() = _Rb_tree_color::rbtcRed;
+			base_ptr uncle = 0;
+			base_ptr grand_parent = 0;
+			base_ptr parent = 0;
+			node->color = _Rb_tree_color::rbtcRed;
 
-			while (_root() != pNode && pNode->pParent->color() == _Rb_tree_color::rbtcRed)
+			while (_root() != node && node->parent->color == _Rb_tree_color::rbtcRed)
 			{
-				pUncle = _uncle(pNode);
-				pParent = pNode->pParent;
-				pGrandParent = pParent->pParent;
+				uncle = _uncle(node);
+				parent = node->parent;
+				grand_parent = parent->parent;
 
-				if (pUncle && pUncle->color() == _Rb_tree_color::rbtcRed)
+				if (uncle && uncle->color == _Rb_tree_color::rbtcRed)
 				{
-					pGrandParent->color() = _Rb_tree_color::rbtcRed;
-					pParent->color() = _Rb_tree_color::rbtcBlack;
-					pUncle->color() = _Rb_tree_color::rbtcBlack;
-					pNode = pGrandParent;
+					grand_parent->color = _Rb_tree_color::rbtcRed;
+					parent->color = _Rb_tree_color::rbtcBlack;
+					uncle->color = _Rb_tree_color::rbtcBlack;
+					node = grand_parent;
 					continue;
 				}
 
-				if (pParent == pGrandParent->pLeft)
+				if (parent == grand_parent->left)
 				{
-					if (pNode == pParent->pRight)
+					if (node == parent->right)
 					{
 						// internal rotation
-						pNode = pNode->pParent;
-						_rotate_left(pNode);
-						pParent = pNode->pParent;
+						node = node->parent;
+						_rotate_left(node);
+						parent = node->parent;
 					}
 
 					// TODO: outer rotation
-					pGrandParent->bColor = _Rb_tree_color::rbtcRed;
-					pParent->bColor = _Rb_tree_color::rbtcBlack;
-					_rotate_right(pGrandParent);
+					grand_parent->color = _Rb_tree_color::rbtcRed;
+					parent->color = _Rb_tree_color::rbtcBlack;
+					_rotate_right(grand_parent);
 				}
-				else // pParent == pGrandParent->pRight
+				else // parent == grand_parent->pRight
 				{
-					if (pNode == pParent->pLeft)
+					if (node == parent->left)
 					{
-						pNode = pNode->pParent;
-						_rotate_right(pParent);
-						pParent = pNode->pParent;
+						node = node->parent;
+						_rotate_right(parent);
+						parent = node->parent;
 					}
 
-					pGrandParent->bColor = _Rb_tree_color::rbtcRed;
-					pParent->bColor = _Rb_tree_color::rbtcBlack;
-					_rotate_left(pGrandParent);
+					grand_parent->color = _Rb_tree_color::rbtcRed;
+					parent->color = _Rb_tree_color::rbtcBlack;
+					_rotate_left(grand_parent);
 				}
 
 			}
 
-			_root()->color() = _Rb_tree_color::rbtcBlack;
+			_root()->color = _Rb_tree_color::rbtcBlack;
 		}
 
-		void _rebalance_for_erase(base_ptr pNode, base_ptr pParent)
+		void _rebalance_for_erase(base_ptr node, base_ptr parent)
 		{
-			base_ptr pBrother = 0;
+			base_ptr brother = 0;
 
 			// child is not the red node,Can't handler it myself
-			while ((!pNode || pNode->bColor == _Rb_tree_color::rbtcBlack) &&
-				pNode != _root())
+			while ((!node || node->color == _Rb_tree_color::rbtcBlack) &&
+				node != _root())
 			{
-				if (pParent->pLeft == pNode)
+				if (parent->left == node)
 				{
-					pBrother = pParent->pRight;
+					brother = parent->right;
 					
 					// this node is not brother, to find real brother
-					if (pBrother->bColor == _Rb_tree_color::rbtcRed)
+					if (brother->color == _Rb_tree_color::rbtcRed)
 					{
-						_rotate_left(pParent);
-						pParent->bColor = _Rb_tree_color::rbtcRed;
-						pBrother->bColor = _Rb_tree_color::rbtcBlack;
-						pBrother = pParent->pRight;
+						_rotate_left(parent);
+						parent->color = _Rb_tree_color::rbtcRed;
+						brother->color = _Rb_tree_color::rbtcBlack;
+						brother = parent->right;
 					}
 
 					// brother any child is red node, Can handle
-					if ((pBrother->pLeft && pBrother->pLeft->bColor == _Rb_tree_color::rbtcRed) ||
-						pBrother->pRight && pBrother->pRight->bColor == _Rb_tree_color::rbtcRed)
+					if ((brother->left && brother->left->color == _Rb_tree_color::rbtcRed) ||
+						brother->right && brother->right->color == _Rb_tree_color::rbtcRed)
 					{
 						// left child is red node
-						if (pBrother->pLeft && pBrother->pLeft->bColor == _Rb_tree_color::rbtcRed)
+						if (brother->left && brother->left->color == _Rb_tree_color::rbtcRed)
 						{
-							_rotate_right(pBrother);
-							pBrother = pBrother->pParent;
-							pBrother->bColor = _Rb_tree_color::rbtcBlack;
+							_rotate_right(brother);
+							brother = brother->parent;
+							brother->color = _Rb_tree_color::rbtcBlack;
 						}
 						else
-							pBrother->pRight->bColor = _Rb_tree_color::rbtcBlack;
+							brother->right->color = _Rb_tree_color::rbtcBlack;
 
-						pBrother->bColor = pParent->bColor;
-						pParent->bColor = _Rb_tree_color::rbtcBlack;
-						_rotate_left(pParent);
+						brother->color = parent->color;
+						parent->color = _Rb_tree_color::rbtcBlack;
+						_rotate_left(parent);
 						break; // complete, any path black node same
 					}
 					else
 					{
-						pBrother->bColor = _Rb_tree_color::rbtcRed;
-						pNode = pParent;
-						pParent = pNode->pParent;
+						brother->color = _Rb_tree_color::rbtcRed;
+						node = parent;
+						parent = node->parent;
 					}
 				}
-				else // pParent->pRight == pNode
+				else // parent->pRight == node
 				{
-					pBrother = pParent->pLeft;
+					brother = parent->left;
 					
-					if (pBrother->bColor == _Rb_tree_color::rbtcRed)
+					if (brother->color == _Rb_tree_color::rbtcRed)
 					{
-						_rotate_right(pParent);
-						pParent->bColor = _Rb_tree_color::rbtcRed;
-						pBrother->bColor = _Rb_tree_color::rbtcBlack;
-						pBrother = pParent->pLeft;
+						_rotate_right(parent);
+						parent->color = _Rb_tree_color::rbtcRed;
+						brother->color = _Rb_tree_color::rbtcBlack;
+						brother = parent->left;
 					}
 
-					if ((pBrother->pLeft && pBrother->pLeft->bColor == _Rb_tree_color::rbtcRed) ||
-						pBrother->pRight && pBrother->pRight->bColor == _Rb_tree_color::rbtcRed)
+					if ((brother->left && brother->left->color == _Rb_tree_color::rbtcRed) ||
+						brother->right && brother->right->color == _Rb_tree_color::rbtcRed)
 					{
-						if (pBrother->pRight && pBrother->pRight->bColor == _Rb_tree_color::rbtcRed)
+						if (brother->right && brother->right->color == _Rb_tree_color::rbtcRed)
 						{
-							_rotate_left(pBrother);
-							pBrother = pBrother->pParent;
-							pBrother->bColor = _Rb_tree_color::rbtcBlack;
+							_rotate_left(brother);
+							brother = brother->parent;
+							brother->color = _Rb_tree_color::rbtcBlack;
 						}
 						else
-							pBrother->pLeft->bColor = _Rb_tree_color::rbtcBlack;
+							brother->left->color = _Rb_tree_color::rbtcBlack;
 
-						pBrother->bColor = pParent->bColor;
-						pParent->bColor = _Rb_tree_color::rbtcBlack;
-						_rotate_right(pParent);
+						brother->color = parent->color;
+						parent->color = _Rb_tree_color::rbtcBlack;
+						_rotate_right(parent);
 						break; // complete, any path black node same
 					}
 					else
 					{
-						pBrother->bColor = _Rb_tree_color::rbtcRed;
-						pNode = pParent;
-						pParent = pNode->pParent;
+						brother->color = _Rb_tree_color::rbtcRed;
+						node = parent;
+						parent = node->parent;
 					}
 				}
 			}
 
-			if (pNode)
-				pNode->bColor = _Rb_tree_color::rbtcBlack;
+			if (node)
+				node->color = _Rb_tree_color::rbtcBlack;
 		}
 
-		iterator _insert(node_ptr& pInsertPoint, node_ptr pParent, const_reference value)
+		iterator _insert(node_ptr& insert_point, node_ptr parent, const_reference value)
 		{
-			node_ptr pNode = _get_node(value);
+			node_ptr node = _get_node(value);
 
 			// empty tree
 			if (_root() == 0)
 			{
 				// this is tree header
-				_root() = pNode;
-				_left_most() = pNode;
-				_right_most() = pNode;
+				_root() = node;
+				_left_most() = node;
+				_right_most() = node;
 			}
 			else
 			{
-				pInsertPoint = pNode;
+				insert_point = node;
 
-				if (_left_most() == pParent)
+				if (_left_most() == parent)
 				{
-					if (pInsertPoint == pParent->left())
-						_left_most() = pInsertPoint;
+					if (insert_point == parent->node_left())
+						_left_most() = insert_point;
 				}
 				else
 				{
-					if (pInsertPoint == pParent->right())
-						_right_most() = pInsertPoint;
+					if (insert_point == parent->node_right())
+						_right_most() = insert_point;
 				}
 			}
 
-			pNode->pParent = pParent;
+			node->parent = parent;
 
-			_rebalance(pNode);
-			++m_size_;
+			_rebalance(node);
+			++size_;
 
 			if (!_verify())
 				throw 1;
 
-			return iterator(pNode);
+			return iterator(node);
 		}
 
-		void _erase(node_ptr pNode)
+		void _erase(node_ptr node)
 		{
-			while (pNode != 0)													    
+			while (node != 0)													    
 			{
-				_erase(pNode->right());
-				node_ptr pY = pNode->left();
-				_put_node(pNode);
-				pNode = pY;
+				_erase(node->node_right());
+				node_ptr y = node->node_left();
+				_put_node(node);
+				node = y;
 			}
 		}
 
 		void _reset()
 		{
-			m_head_.pParent = 0;
-			m_head_.pLeft = &m_head_;
-			m_head_.pRight = &m_head_;
-			m_size_ = 0;
+			head_.parent = 0;
+			head_.left = &head_;
+			head_.right = &head_;
+			size_ = 0;
 		}
 
-		void _erase_aux(base_ptr pNode)
+		void _erase_aux(base_ptr node)
 		{
-			base_ptr pParent = pNode->pParent;
-			base_ptr pChild = 0;
+			base_ptr parent = node->parent;
+			base_ptr child = 0;
 
-			if (pNode->pLeft != 0 && pNode->pRight != 0)
+			if (node->left != 0 && node->right != 0)
 			{
 				// left child of pSuccessor must be 0
-				base_ptr pSuccessor = _Bs_tree<base_ptr>::successor(pNode);
-				pChild = pSuccessor->pRight;
+				base_ptr pSuccessor = _Bs_tree<base_ptr>::successor(node);
+				child = pSuccessor->right;
 
-				// case 1: successor as pNode right child
-				if (pSuccessor == pNode->pRight)
+				// case 1: successor as node right child
+				if (pSuccessor == node->right)
 				{
-					pSuccessor->pLeft = pNode->pLeft;
-					pNode->pLeft->pParent = pSuccessor;
-					pParent = pSuccessor;
+					pSuccessor->left = node->left;
+					node->left->parent = pSuccessor;
+					parent = pSuccessor;
 
-					_Bs_tree<base_ptr>::transplant(pNode, pSuccessor, _root());
+					_Bs_tree<base_ptr>::transplant(node, pSuccessor, _root());
 				}
-				else // case 2: successor replace pNode, delete successor
+				else // case 2: successor replace node, delete successor
 				{
-					pParent = pSuccessor->pParent;
+					parent = pSuccessor->parent;
 
-					pSuccessor->pLeft = pNode->pLeft;
-					pSuccessor->pRight = pNode->pRight;
-					pNode->pLeft->pParent = pSuccessor;
-					pNode->pRight->pParent = pSuccessor;
+					pSuccessor->left = node->left;
+					pSuccessor->right = node->right;
+					node->left->parent = pSuccessor;
+					node->right->parent = pSuccessor;
 
 
-					_Bs_tree<base_ptr>::transplant(pSuccessor, pChild, _root());
-					_Bs_tree<base_ptr>::transplant(pNode, pSuccessor, _root());
+					_Bs_tree<base_ptr>::transplant(pSuccessor, child, _root());
+					_Bs_tree<base_ptr>::transplant(node, pSuccessor, _root());
 				}
 
-				std::swap<_Rb_tree_color>(pSuccessor->bColor, pNode->bColor);
+				std::swap<_Rb_tree_color>(pSuccessor->color, node->color);
 			}
 			else
 			{
 				// case 3: left  child is 0
 				// case 4: right child is 0
 				// case 5: left and right is 0
-				if (pNode->pLeft == 0)
-					pChild = pNode->pRight;
-				else // pNode->pRight == 0 or pLeft and pRight is 0
-					pChild = pNode->pLeft;
+				if (node->left == 0)
+					child = node->right;
+				else // node->pRight == 0 or pLeft and pRight is 0
+					child = node->left;
 
-				_Bs_tree<base_ptr>::transplant(pNode, pChild, _root());
+				_Bs_tree<base_ptr>::transplant(node, child, _root());
 
 				if (!_root())
-					_left_most() = _right_most() = &m_head_;
-				else if(pNode == _left_most())
-					_left_most() = _Bs_tree<base_ptr>::min_num(_root());
-				else if(pNode == _right_most())
-					_right_most() = _Bs_tree<base_ptr>::max_num(_root());
+					_left_most() = _right_most() = &head_;
+				else if(node == _left_most())
+					_left_most() = _Bs_tree<base_ptr>::left_most(_root());
+				else if(node == _right_most())
+					_right_most() = _Bs_tree<base_ptr>::right_most(_root());
 			}
 
-			if (pNode->bColor == _Rb_tree_color::rbtcBlack)
-				_rebalance_for_erase(pChild, pParent);
+			if (node->color == _Rb_tree_color::rbtcBlack)
+				_rebalance_for_erase(child, parent);
 
-			--m_size_;
-			_put_node((node_ptr)pNode);
+			--size_;
+			_put_node((node_ptr)node);
 		}
 
 		void _erase(const_iterator first, const_iterator last)
@@ -553,7 +547,7 @@ namespace mtl
 			{
 				while (first != end())
 				{
-					_erase_aux(first.pNode);
+					_erase_aux(first.node);
 					first++;
 				}
 			}
@@ -562,37 +556,38 @@ namespace mtl
 		bool _verify()
 		{
 			// check header
-			if (m_size_ == 0)
+			if (size_ == 0)
 			{
-				return m_head_.pLeft == m_head_.pRight &&
-					m_head_.pLeft == &m_head_ &&
+				return head_.left == head_.right &&
+					head_.left == &head_ &&
 					begin() == end() &&
 					_left_most() == _right_most();
 			}
 
 			node_ptr pMiniNum = 0;
-			int nLeftBlackCount = _get_black_count(begin().pNode);
+			int nLeftBlackCount = _get_black_count(begin().node);
 
 			for (iterator iter = begin(); iter != end(); ++iter)
 			{
-				node_ptr pNode = (node_ptr)iter.pNode;
+				node_ptr node = (node_ptr)iter.node;
 
-				if (pNode->bColor == _Rb_tree_color::rbtcRed)
+				if (node->color == _Rb_tree_color::rbtcRed)
 				{
-					if (pNode->left() && pNode->left()->bColor == _Rb_tree_color::rbtcRed)
+					if (node->node_left() && node->node_left()->color == _Rb_tree_color::rbtcRed)
 						return false;
-					if (pNode->right() && pNode->right()->bColor == _Rb_tree_color::rbtcRed)
+					if (node->node_right() && node->node_right()->color == _Rb_tree_color::rbtcRed)
 						return false;
 				}
 
-				if (!pMiniNum || m_compare_(pMiniNum->value, pNode->value))
-					pMiniNum = pNode;
-				else // !m_compare_(pMiniNum, pNode)
+				if (!pMiniNum || compare_(pMiniNum->value, node->value))
+					pMiniNum = node;
+				else if(compare_(node->value, pMiniNum->value)) // inorder next node > current node
 					return false;
 
-				if (!pNode->pLeft && !pNode->pRight)
+				// left
+				if (!node->left && !node->right)
 				{
-					if (nLeftBlackCount != _get_black_count(iter.pNode))
+					if (nLeftBlackCount != _get_black_count(iter.node))
 						return false;
 				}
 			}
@@ -611,13 +606,13 @@ namespace mtl
 
 		void print_tree()
 		{
-			CPrintBTree<node_ptr>::Print((node_ptr)_root());
-			cout << "size:" << m_size_ << endl;
+			CPrintBTree<node_ptr>::print((node_ptr)_root());
+			cout << "size:" << size_ << endl;
 		}
 
 		iterator begin() { return iterator(_left_most()); }
-		iterator end() { return iterator(&m_head_); }
-		size_type size() const { return m_size_; }
+		iterator end() { return iterator(&head_); }
+		size_type size() const { return size_; }
 		iterator find(key_type& key) { return _find(key); }
 		void clear()
 		{
@@ -626,11 +621,11 @@ namespace mtl
 		}
 		void erase(iterator iter)
 		{
-			int nValue = iter->first;
+			int value = iter->first;
 
-			std::cout << "remove:" << nValue << "\n";
+			std::cout << "remove:" << value << "\n";
 
-			_erase_aux(iter.pNode);
+			_erase_aux(iter.node);
 
 			if (!_verify())
 				throw 1;
@@ -638,52 +633,53 @@ namespace mtl
 		iterator insert_unique(const_reference value)
 		{
 			node_ptr pX = (node_ptr)_root();
-			node_ptr pParent = (node_ptr)&m_head_;
+			node_ptr parent = (node_ptr)&head_;
 
-			bool bComp = true;
+			bool comp = true;
 
 			while (pX)
 			{
-				pParent = pX;
-				bComp = m_compare_(value, pX->value);
-				pX = bComp ? pX->left() : pX->right();
+				parent = pX;
+				comp = compare_(value, pX->value);
+				pX = comp ? pX->node_left() : pX->node_right();
 			}
 
-			iterator iter = iterator(pParent);
-			if (bComp)
+			iterator iter = iterator(parent);
+			if (comp)
 			{
 				if (iter == begin())
-					return _insert(pParent->left(), pParent, value);
+					return _insert(parent->node_left(), parent, value);
 				else
 					--iter;
 			}
 
-			if (m_compare_(*iter, value))
-				return _insert(bComp ? pParent->left() : pParent->right(), pParent, value);
+			if (compare_(*iter, value))
+				return _insert(comp ? parent->node_left() : parent->node_right(), parent, value);
 
 			return end();
 		}
 		iterator insert_equal(const_reference value)
 		{
-			node_ptr pParent = &m_head_;
-			node_ptr pInsertPoint = (node_ptr)_root();
-			bool bComp = true;
-			while (pInsertPoint)
+			node_ptr parent = (node_ptr)&head_;
+			node_ptr insert_point = (node_ptr)_root();
+			bool comp = true;
+			while (insert_point)
 			{
-				pParent = pInsertPoint;
-				pInsertPoint = m_compare_(value, pInsertPoint->value) ?
-					pInsertPoint->pLeft :
-					pInsertPoint->pRight;
+				parent = insert_point;
+				comp = compare_(value, insert_point->value);
+				insert_point = comp
+					? insert_point->node_left()
+					: insert_point->node_right();
 			}
 
-			return _insert(bComp ? pParent->left() : pParent->right(), pParent, value);
+			return _insert(comp ? parent->node_left() : parent->node_right(), parent, value);
 		}
 
 	private:
-		_Compare m_compare_;
-		_Rb_tree_node_base m_head_;
-		node_alloc m_node_allocator_;
-		size_type m_size_;
+		_Compare compare_;
+		_Rb_tree_node_base head_;
+		node_alloc node_allocator_;
+		size_type size_;
 	};
 }
 

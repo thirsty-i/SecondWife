@@ -6,7 +6,7 @@
 
 namespace mtl {
 	template <class T>
-	class _New_delete_allocator
+	class _new_delete_allocator
 	{
 	public:
 		typedef T  value_type;
@@ -21,15 +21,15 @@ namespace mtl {
 		template <class _Up>
 		struct rebind
 		{
-			typedef _New_delete_allocator<_Up> other;
+			typedef _new_delete_allocator<_Up> other;
 		};
 
-		_New_delete_allocator() noexcept {}
-		_New_delete_allocator(const _New_delete_allocator&) noexcept {}
+		_new_delete_allocator() noexcept {}
+		_new_delete_allocator(const _new_delete_allocator&) noexcept {}
 
 		template <class _Up>
-		_New_delete_allocator(const _New_delete_allocator<_Up>&) noexcept {}
-		~_New_delete_allocator() noexcept {}
+		_new_delete_allocator(const _new_delete_allocator<_Up>&) noexcept {}
+		~_new_delete_allocator() noexcept {}
 
 		pointer allocate(size_type n)
 		{
@@ -62,6 +62,6 @@ namespace mtl {
 	};
 
 	template <class _Type>
-	using allocator = mtl::_New_delete_allocator<_Type>;
+	using allocator = mtl::_new_delete_allocator<_Type>;
 };
 #endif // _H_ALLOCATOR_H_

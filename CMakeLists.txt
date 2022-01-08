@@ -24,9 +24,7 @@ message("hello")
 # includes
 target_include_directories(
 	"game_server" PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/mtl
-	${CMAKE_CURRENT_SOURCE_DIR}/include/log
-	${CMAKE_CURRENT_SOURCE_DIR}/include/common
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include)

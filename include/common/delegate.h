@@ -6,16 +6,14 @@
 #include <utility>
 
 namespace mtl {
-	template<class _Signature>
-	class CDelegate;
 
 	template <class _Ref, class... _Types>
-	class CDelegate	final
+	class delegate final
 	{
 	public:
 		typedef std::function<void(_Types...)> functor_type;
 		
-		~CDelegate()
+		~delegate()
 		{
 			functors_.clear();
 		}
@@ -25,7 +23,7 @@ namespace mtl {
 			functors_.push_back(std::forward<functor_type>(func));
 		}
 
-		void Invoke(_Types&&... args)
+		void invoke(_Types&&... args)
 		{
 			for (const functor_type& func : functors_)
 			{

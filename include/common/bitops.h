@@ -1,29 +1,28 @@
 #ifndef _H_BIT_OPS_H_
 #define _H_BIT_OPS_H_
 
-#include "type_int.h"
 #include <type_traits>
 
-template <class Integer>
-static UINT32 fls(Integer x)
+template <class integer>
+static uint32_t fls(integer x)
 {
-	static_assert(std::is_integral<Integer>::value, "param not integral");
+	static_assert(std::is_integral<integer>::value, "param not integral");
 
 	if (!x)
 		return 0;
 
-	INT8 highest = sizeof(Integer) * 8;
-	Integer _bit = highest;
-	Integer _tmp = -1;
+	int8_t highest = sizeof(integer) * 8;
+	integer bit = highest;
+	integer tmp = -1;
 
-	while (_bit > 1)
+	while (bit > 1)
 	{
-		_bit >>= 1;
-		_tmp <<= _bit;
+		bit >>= 1;
+		tmp <<= bit;
 
-		if (!(x & _tmp)) {
-			x <<= _bit;
-			highest -= _bit;
+		if (!(x & tmp)) {
+			x <<= bit;
+			highest -= bit;
 		}
 	}
 
@@ -31,25 +30,25 @@ static UINT32 fls(Integer x)
 }
 
 
-template <class Integer>
-static bool Is2Pow(Integer x)
+template <class integer>
+static bool is_2_pow(integer x)
 {
-	static_assert(std::is_integral<Integer>::value, "param not integral");
+	static_assert(std::is_integral<integer>::value, "param not integral");
 	return x && ((x & (x - 1)) == 0);
 }
 
-template <class Integer>
-static Integer RoundupPowOf2(Integer x)
+template <class integer>
+static integer round_up_pow_of_2(integer x)
 {
-	static_assert(std::is_integral<Integer>::value, "param not integral");
-	return (x ? 1 << fls<Integer>(x - 1) : 0);
+	static_assert(std::is_integral<integer>::value, "param not integral");
+	return (x ? 1 << fls<integer>(x - 1) : 0);
 }
 
-template <class Integer>
-static Integer RounddownPowOf2(Integer x)
+template <class integer>
+static integer round_down_pow_of_2(integer x)
 {
-	static_assert(std::is_integral<Integer>::value, "param not integral");
-	return (x ? 1 << (fls<Integer>(x) - 1): 0);
+	static_assert(std::is_integral<integer>::value, "param not integral");
+	return (x ? 1 << (fls<integer>(x) - 1): 0);
 }
 
 #endif // _H_BIT_OPS_H_

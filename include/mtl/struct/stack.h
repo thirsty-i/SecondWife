@@ -5,7 +5,7 @@
 
 namespace mtl {
 	template <class T, class Sequence = std::deque<T>>
-	class CStack
+	class stack
 	{
 	public:
 		using value_type = typename Sequence::value_type;
@@ -17,18 +17,18 @@ namespace mtl {
 	protected:
 
 	public:
-		CStack() : m_Container() {}
-		CStack(const Sequence& s) : m_Container(s) {}
+		stack() : container_() {}
+		stack(const Sequence& s) : container_(s) {}
 
-		void Push(const_reference rNode) { m_Container.push_back(rNode); }
-		void Pop() { m_Container.pop_back(); }
-		size_type Size() const { m_Container.size(); }
-		bool Empty() { return m_Container.empty(); }
+		void push(const_reference rNode) { container_.push_back(rNode); }
+		void pop() { container_.pop_back(); }
+		size_type size() const { container_.size(); }
+		bool empty() { return container_.empty(); }
 
-		reference Top() { return m_Container.back(); }
-		const_reference Top() const { return m_Container.back(); }
+		reference top() { return container_.back(); }
+		const_reference top() const { return container_.back(); }
 	private:
-		Sequence m_Container;
+		Sequence container_;
 	};
 };
 #endif // _H_STACK_H_

@@ -1,39 +1,35 @@
 #ifndef _H_SINGLETON_H_
 #define _H_SINGLETON_H_
 
+#include "common/noncopyable.h"
+
 namespace mtl
 {
 	template <class T>
-	class CSingleton
+	class singleton
+		: private noncopyable
 	{
 	public:
-		static T& GetInstance()
+		static const T& GetInstance()
 		{
-			if (m_Instance == nullptr)
-				m_Instance = new T;
+			if (instance_ == nullptr)
+				instance_ = new T;
 
-			return *m_Instance;
-		}
+			return *instance_;		
 
-		static void DestroyInstance()
-		{
-			delete m_Instance;
-			m_Instance = nullptr;
-		}
-
-
-		CSingleton(T&&) = delete;
-		CSingleton(const T&) = delete;
-		void operator= (const T&) = delete;
+		singleton(T&&) = delete;
 
 	protected:
-		CSingleton(void) = default;
-		virtual ~CSingleton() = default;
+		singleton(void) = default;
+		virtual ~singleton()
+		{
+			delete instance_;
+		};
 
-		static T* m_Instance;
+		static T* instance_;
 	};
 
 	template <class T>
-	T* CSingleton<T>::m_Instance = nullptr;
+	T* singleton<T>::instance_ = nullptr;
 };
 #endif // _H_SINGLETON_H_

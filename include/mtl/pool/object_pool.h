@@ -1,31 +1,20 @@
 #ifndef _H_OBJECT_POOL_H_
 #define	_H_OBJECT_POOL_H_
 
-#include "type_int.h"
-#include "allocator.h"
+#include "mtl/memory/allocator.h"
 #include "stack.h"
 #include <deque>
 #include <utility>
-#include "lock.h"
+#include "mtl/thread/null_lock.hpp"
+#include "common/noncopyable.h"
 #include <list>
+#include <mutex>
 
 namespace mtl
 {
-	// 这里暂时用特化解决，目前没有找到STL的模板三目运算
-	template <bool Lock>
-	struct LockTraits
-	{
-		using lock_type = CNullLock;
-	};
-
-	template <>
-	struct LockTraits<true>
-	{
-		using lock_type = CSpinLock;
-	};
-
 	template <class T, bool Lock, class Alloc = allocator<T>>
-	class CObjectPool
+	class object_pool final
+		: private noncopyable
 	{
 	public:
 		using value_type = T;
@@ -33,75 +22,71 @@ namespace mtl
 		using reference = T&;
 		using size_type = size_t;
 		using allocator_type = typename Alloc::template rebind<value_type>::other;
-		using lock_type = typename LockTraits<Lock>::lock_type;
+		using lock_type = typename std::conditional<Lock, std::mutex, null_lock>::type;
 
-		explicit CObjectPool(size_type size) : m_Size(size) {};
-		~CObjectPool() {
+		explicit object_pool(size_type size) : size_(size) {};
+		~object_pool() {
 			Clear();
 			// TODO: check allocate.count == deallocate.cout?
 		};
 
-		CObjectPool& operator=(CObjectPool&) = delete;
-		CObjectPool(const CObjectPool&) = delete;				 
-		CObjectPool() = delete;
-
 	protected:
-		pointer _Refill()
+		pointer _refill()
 		{
-			size_type refillSize = _GetRefillSize();
-			pointer pChunk = m_Allocator.allocate(refillSize);
-			m_Size += refillSize;
+			size_type refillSize = _get_refill_size();
+			pointer chunk = allocator_.allocate(refillSize);
+			size_ += refillSize;
 
 			while (--refillSize)
-				m_FreeStack.Push(pChunk + refillSize);
+				free_stack_.push(chunk + refillSize);
 
-			m_lstChunk.push_back(pChunk);
-			return pChunk; // return object memory
+			chunks_.push_back(chunk);
+			return chunk; // return object memory
 		}
 
-		size_type _GetRefillSize() { return m_Size; }
+		size_type _get_refill_size() { return size_; }
 
 	public:
 		void Clear()
 		{
-			while (!m_lstChunk.empty())
+			while (!chunks_.empty())
 			{
-				m_Allocator.deallocate(m_lstChunk.front());
-				m_lstChunk.pop_front();
+				allocator_.deallocate(chunks_.front());
+				chunks_.pop_front();
 			}
 		}
 
 		template <class... Args>
-		pointer New(Args&&... args)
+		pointer create(Args&&... args)
 		{
-			CLockGuard<lock_type> oLockGuard(m_Lock);
+			std::lock_guard<lock_type> lock_guard(lock_);
 			pointer pNode = 0;
-			if (m_FreeStack.Empty())
-				pNode = _Refill();
+			if (free_stack_.empty())
+				pNode = _refill();
 			else
 			{
-				pNode = m_FreeStack.Top();
-				m_FreeStack.Pop();
+				pNode = free_stack_.top();
+				free_stack_.pop();
 			}
 
 			if (pNode)
-				m_Allocator.construct(pNode, std::forward<Args>(args)...);
+				allocator_.construct(pNode, std::forward<Args>(args)...);
 
 			return pNode;
 		}
 
-		void Delete(pointer pNode)
+		void release(pointer pNode)
 		{
-			CLockGuard<lock_type> oLockGuard(m_Lock);
-			m_Allocator.destroy(pNode);
-			m_FreeStack.Push(pNode);
+			std::lock_guard<lock_type> lock_guard(lock_);
+			allocator_.destroy(pNode);
+			free_stack_.push(pNode);
 		}
 	protected:
-		std::list<pointer> m_lstChunk;
-		CStack<pointer>  m_FreeStack;
-		allocator_type m_Allocator;	  // 改成指针?
-		size_type m_Size;
-		lock_type m_Lock;
+		std::list<pointer> chunks_;
+		stack<pointer>  free_stack_;
+		allocator_type allocator_;	  // 改成指针?
+		size_type size_;
+		lock_type lock_;
 	};
 };
 #endif // _H_OBJECT_POOL_H_

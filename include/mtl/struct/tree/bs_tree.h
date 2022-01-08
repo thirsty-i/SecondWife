@@ -13,122 +13,98 @@ namespace mtl
 		//_Bs_tree() = delete;
 		//_Bs_tree(pointer pHead) : m_Head(pHead) {};
 
-		static pointer predecessor(const_pointer pcNode)
+		static pointer predecessor(const_pointer cnode)
 		{
-			if (pcNode == 0)
+			if (cnode == 0)
 				return 0;
 
-			pointer pNode = pcNode;
+			pointer node = cnode;
 
-			if (pNode->pLeft)
+			if (node->left)
 			{
-				pNode = pNode->pLeft;
+				node = node->left;
 
-				while (pNode->pLeft)
-					pNode = pNode->pLeft;
+				while (node->left)
+					node = node->left;
 			}
 			else
 			{
-				while (pNode->pParent->pLeft == pNode)
-					pNode = pNode->pParent;
+				while (node->parent->left == node)
+					node = node->parent;
 
-				if (pNode->pLeft != pNode->pParent)
-					pNode = pNode->pParent;
+				if (node->left != node->parent)
+					node = node->parent;
 			}
 
-			return pNode;
+			return node;
 		}
 
-		static pointer successor(const_pointer pcNode)
+		static pointer successor(const_pointer cnode)
 		{
-			if (pcNode == 0)
+			if (cnode == 0)
 				return 0;
 
-			pointer pNode = pcNode;
+			pointer node = cnode;
 
-			if (pNode->pRight)
+			if (node->right)
 			{
-				pNode = pNode->pRight;
+				node = node->right;
 
-				while (pNode->pLeft)
-					pNode = pNode->pLeft;
+				while (node->left)
+					node = node->left;
 			}
 			else
 			{
-				while (pNode->pParent->pRight == pNode)
-					pNode = pNode->pParent;
+				while (node->parent->right == node)
+					node = node->parent;
 
-				if (pNode->pRight != pNode->pParent)
-					pNode = pNode->pParent;
+				if (node->right != node->parent)
+					node = node->parent;
 			}
 
-			return pNode;
+			return node;
 		}
 
-		static pointer leftMost(const_pointer pNode)
+		static pointer left_most(const_pointer node)
 		{
-			if (pNode == 0)
+			if (node == 0)
 				return 0;
 
-			pointer _pTmp = pNode;
-			while (_pTmp->pLeft)
-				_pTmp = _pTmp->pLeft;
-			return _pTmp;
+			const_pointer tmp = node;
+			while (tmp->left)
+				tmp = tmp->left;
+			return tmp;
 		}
 
-		static pointer right_most(const_pointer pNode)
+		static pointer right_most(const_pointer node)
 		{
-			if (pNode == 0)
+			if (node == 0)
 				return 0;
 
-			pointer _pTmp = pNode;
-			while (_pTmp->pRight)
-				_pTmp = _pTmp->pRight;
-			return _pTmp;
+			const_pointer tmp = node;
+			while (tmp->right)
+				tmp = tmp->right;
+			return tmp;
 		}
 	
 		static void transplant(pointer pDst, pointer pSrc, pointer& pRoot)
 		{
-			const_pointer pParent = pDst->pParent;
+			const_pointer parent = pDst->parent;
 			if (pDst == pRoot)
 			{
-				pParent->pParent = pSrc;
+				parent->parent = pSrc;
 				pRoot = pSrc;
 			}
 			else
 			{
-				if (pParent->pLeft == pDst)
-					pParent->pLeft = pSrc;
-				else // pParent->pRight == pDst
-					pParent->pRight = pSrc;
+				if (parent->left == pDst)
+					parent->left = pSrc;
+				else // parent->right == pDst
+					parent->right = pSrc;
 			}
 
 			if (pSrc)
-				pSrc->pParent = pParent;
-		}
-	
-		static pointer min_num(const_pointer pRoot)
-		{
-			if (pRoot == 0)
-				return 0;
-
-			pointer pNode = pRoot;
-			while (pNode->pLeft)
-				pNode = pNode->pLeft;
-
-			return pNode;
-		}
-
-		static pointer max_num(const_pointer pRoot)
-		{
-			if (pRoot == 0)
-				return 0;
-
-			pointer pNode = pRoot;
-			while (pNode->pRight)
-				pNode = pNode->pRight;
-
-			return pNode;
+				pSrc->parent = parent;
 		}
 	private:
 		//pointer m_Head;

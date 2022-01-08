@@ -1,8 +1,8 @@
 #ifndef _H_MAP_H_
 #define _H_MAP_H_
 
-#include "struct/tree/rb_tree.h"
-#include "memory"
+#include "mtl/struct/tree/rb_tree.h"
+#include "mtl/memory/allocator.h"
 
 namespace mtl
 {
@@ -10,7 +10,7 @@ namespace mtl
 		class _Key,
 		class _Value,
 		class _Compare = std::less<_Key>,
-		class _Alloc = mtl::allocator<std::pair<const _Key, _Value>>
+		class _Alloc = allocator<std::pair<const _Key, _Value>>
 	>
 		class map
 	{
@@ -46,24 +46,24 @@ namespace mtl
 		using const_iterator = typename _impl_type::const_iterator;
 		using size_type      = typename _impl_type::size_type;
 
-		map() : m_rb_tree_() {}
+		map() : rb_tree_() {}
 	public:
-		iterator insert(const pair_type& pair) { return m_rb_tree_.insert_unique(pair); }
-		iterator find(const _Key& key) { return m_rb_tree_.find(key); }
-		iterator find(_Key&& key) { return m_rb_tree_.find(key); }
-		void erase(iterator iter) { return m_rb_tree_.erase(iter); }
-		size_type size() { return m_rb_tree_.size(); }
+		iterator insert(const pair_type& pair) { return rb_tree_.insert_unique(pair); }
+		iterator find(const _Key& key) { return rb_tree_.find(key); }
+		iterator find(_Key&& key) { return rb_tree_.find(key); }
+		void erase(iterator iter) { return rb_tree_.erase(iter); }
+		size_type size() { return rb_tree_.size(); }
 
-		iterator begin() { return m_rb_tree_.begin(); }
-		iterator end() { return m_rb_tree_.end(); }
+		iterator begin() { return rb_tree_.begin(); }
+		iterator end() { return rb_tree_.end(); }
 
-		//const_iterator find(const _Key& key) const { return m_rb_tree_.Find(key); }
-		//const_iterator begin() const { return m_rb_tree_.Begin(); }
-		//const_iterator end() const { return m_rb_tree_.End(); }
+		//const_iterator find(const _Key& key) const { return rb_tree_.Find(key); }
+		//const_iterator begin() const { return rb_tree_.Begin(); }
+		//const_iterator end() const { return rb_tree_.End(); }
 
-		void print_tree() { m_rb_tree_.printTree();  }
+		void print_tree() { rb_tree_.print_tree();  }
 	private:
-		_impl_type m_rb_tree_;
+		_impl_type rb_tree_;
 	};
 }
 
