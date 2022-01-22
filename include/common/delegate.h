@@ -1,7 +1,7 @@
 #ifndef _HPP_DELEGATE_HPP_
 #define _HPP_DELEGATE_HPP_
 
-#include <vector>
+#include <queue>
 #include <functional>
 #include <utility>
 
@@ -31,7 +31,7 @@ namespace mtl {
 			}
 		}
 	private:
-		std::vector<functor_type> functors_;
+		std::queue<functor_type> functors_;
 	};
 };
 #endif // _HPP_DELEGATE_HPP_

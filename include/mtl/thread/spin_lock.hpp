@@ -8,13 +8,13 @@ class spin_lock
 	: private noncopyable
 {
 public:
-	bool try_lock()
+	bool try_lock()	noexcept
 	{
 		return !lock_.load(std::memory_order_relaxed)
 			&& !lock_.exchange(true, std::memory_order_acquire);
 	}
 
-	void lock()
+	void lock()	noexcept
 	{
 		if (!lock_.exchange(true, std::memory_order_acquire)) {
 			return;
@@ -25,7 +25,7 @@ public:
 		}
 	}
 
-	void unlock()
+	void unlock() noexcept
 	{
 		lock_.store(false, std::memory_order_release);
 	}

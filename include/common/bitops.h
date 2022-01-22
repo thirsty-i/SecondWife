@@ -2,6 +2,7 @@
 #define _H_BIT_OPS_H_
 
 #include <type_traits>
+#include <cstdint>
 
 template <class integer>
 static uint32_t fls(integer x)

@@ -1,18 +1,15 @@
 #ifndef _H_OBJECT_POOL_H_
 #define	_H_OBJECT_POOL_H_
 
-#include "mtl/memory/allocator.h"
-#include "stack.h"
-#include <deque>
+#include "mtl/struct/lock_free/stack.h"
 #include <utility>
 #include "mtl/thread/null_lock.hpp"
 #include "common/noncopyable.h"
-#include <list>
 #include <mutex>
 
 namespace mtl
 {
-	template <class T, bool Lock, class Alloc = allocator<T>>
+	template <class T, bool Lock, class Alloc = std::allocator<T>>
 	class object_pool final
 		: private noncopyable
 	{
@@ -26,28 +23,11 @@ namespace mtl
 
 		explicit object_pool(size_type size) : size_(size) {};
 		~object_pool() {
-			Clear();
+			clear();
 			// TODO: check allocate.count == deallocate.cout?
 		};
-
-	protected:
-		pointer _refill()
-		{
-			size_type refillSize = _get_refill_size();
-			pointer chunk = allocator_.allocate(refillSize);
-			size_ += refillSize;
-
-			while (--refillSize)
-				free_stack_.push(chunk + refillSize);
-
-			chunks_.push_back(chunk);
-			return chunk; // return object memory
-		}
-
-		size_type _get_refill_size() { return size_; }
-
 	public:
-		void Clear()
+		void clear()
 		{
 			while (!chunks_.empty())
 			{
@@ -59,31 +39,48 @@ namespace mtl
 		template <class... Args>
 		pointer create(Args&&... args)
 		{
-			std::lock_guard<lock_type> lock_guard(lock_);
-			pointer pNode = 0;
-			if (free_stack_.empty())
-				pNode = _refill();
-			else
-			{
-				pNode = free_stack_.top();
-				free_stack_.pop();
-			}
+			pointer node = static_cast<pointer>(free_stack_.pop());
 
-			if (pNode)
-				allocator_.construct(pNode, std::forward<Args>(args)...);
+			if (!node)
+				_refill();
 
-			return pNode;
+			//else
+			//{
+			//	node = free_stack_.top();
+			//	free_stack_.pop();
+			//}
+
+			if (node)
+				allocator_.construct(node, std::forward<Args>(args)...);
+
+			return node;
 		}
 
-		void release(pointer pNode)
+		void release(pointer node)
 		{
-			std::lock_guard<lock_type> lock_guard(lock_);
-			allocator_.destroy(pNode);
-			free_stack_.push(pNode);
+			//std::lock_guard<lock_type> lock_guard(lock_);
+			allocator_.destroy(node);
+			free_stack_.push(static_cast<stack_node*>(node));
 		}
-	protected:
+
+	private:
+		pointer _refill()
+		{
+			size_type refill_size = _get_refill_size();
+			pointer chunk = allocator_.allocate(refill_size);
+			size_ += refill_size;
+
+			while (--refill_size)
+				free_stack_.push(chunk + refill_size);
+
+			chunks_.push_back(chunk);
+			return chunk; // return object memory
+		}
+
+		size_type _get_refill_size() { return size_; }
+	private:
 		std::list<pointer> chunks_;
-		stack<pointer>  free_stack_;
+		lock_free::stack<pointer>  free_stack_;
 		allocator_type allocator_;	  // ¸Ä³ÉÖ¸Õë?
 		size_type size_;
 		lock_type lock_;

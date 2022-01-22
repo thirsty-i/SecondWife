@@ -2,7 +2,6 @@
 #define _H_MAP_H_
 
 #include "mtl/struct/tree/rb_tree.h"
-#include "mtl/memory/allocator.h"
 
 namespace mtl
 {
@@ -10,7 +9,7 @@ namespace mtl
 		class _Key,
 		class _Value,
 		class _Compare = std::less<_Key>,
-		class _Alloc = allocator<std::pair<const _Key, _Value>>
+		class _Alloc = std::allocator<std::pair<const _Key, _Value>>
 	>
 		class map
 	{

@@ -10,26 +10,18 @@ namespace mtl
 		: private noncopyable
 	{
 	public:
-		static const T& GetInstance()
+		static T& instance()
 		{
-			if (instance_ == nullptr)
-				instance_ = new T;
-
-			return *instance_;		
+			return instance_;
+		}
 
 		singleton(T&&) = delete;
-
 	protected:
 		singleton(void) = default;
-		virtual ~singleton()
-		{
-			delete instance_;
-		};
-
-		static T* instance_;
+		static T instance_;
 	};
 
 	template <class T>
-	T* singleton<T>::instance_ = nullptr;
+	T singleton<T>::instance_;
 };
 #endif // _H_SINGLETON_H_
