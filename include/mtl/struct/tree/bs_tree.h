@@ -1,5 +1,4 @@
-#ifndef _H_BINARY_TREE_H_
-#define _H_BINARY_TREE_H_
+#pragma once
 
 namespace mtl
 {
@@ -110,4 +109,3 @@ namespace mtl
 		//pointer m_Head;
 	};
 }
-#endif 	// _H_BINARY_TREE_H_

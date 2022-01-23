@@ -1,5 +1,4 @@
-#ifndef _HPP_NULL_LOCK_HPP_
-#define _HPP_NULL_LOCK_HPP_
+#pragma once
 
 class null_lock
 {
@@ -10,6 +9,3 @@ public:
 	void lock() { /*do nothing*/ }
 	void unlock() { /*do nothing*/}
 };
-
-
-#endif // _HPP_NULL_LOCK_HPP_

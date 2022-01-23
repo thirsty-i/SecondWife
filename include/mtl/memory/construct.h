@@ -1,5 +1,4 @@
-#ifndef _H_CONSTRUCT_H_
-#define _H_CONSTRUCT_H_
+#pragma once
 
 #include <new>
 #include <utility>
@@ -15,5 +14,3 @@ void destroy(T* __p)
 {
 	__p->~T();
 }
-
-#endif // _H_CONSTRUCT_H_

@@ -31,6 +31,8 @@ int main()
 
 #include "mtl/struct/ring_buffer.h"
 #include <cstdio>
+#include <atomic>
+#include "mtl/struct/lock_free/stack.h"
 
 int main()
 {
@@ -40,14 +42,8 @@ int main()
 	//		X::get_instance();
 	//	}
 
-	char buffer[1 << 10];
-	mtl::ring_buffer ring_buffer(buffer, sizeof(buffer));
+	
 
-	ring_buffer.write("hello", sizeof("hello"));
-
-	uint32_t used = ring_buffer.get_used();
-
-	printf("unsd:%u\n", used);
 	return 0;
 }
 

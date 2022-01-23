@@ -1,5 +1,4 @@
-#ifndef _HPP_SPIN_LOCK_HPP_
-#define _HPP_SPIN_LOCK_HPP_
+#pragma once
 
 #include "common/noncopyable.h"
 #include <atomic>
@@ -33,5 +32,3 @@ public:
 private:
 	std::atomic<bool> lock_ = { false };
 };
-
-#endif // _HPP_SPIN_LOCK_HPP_

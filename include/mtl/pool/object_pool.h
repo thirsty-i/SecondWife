@@ -1,5 +1,4 @@
-#ifndef _H_OBJECT_POOL_H_
-#define	_H_OBJECT_POOL_H_
+#pragma once
 
 #include "mtl/struct/lock_free/stack.h"
 #include <utility>
@@ -9,7 +8,7 @@
 
 namespace mtl
 {
-	template <class T, bool Lock, class Alloc = std::allocator<T>>
+	template <class T, bool Bounded, class Alloc = std::allocator<T>>
 	class object_pool final
 		: private noncopyable
 	{
@@ -19,7 +18,6 @@ namespace mtl
 		using reference = T&;
 		using size_type = size_t;
 		using allocator_type = typename Alloc::template rebind<value_type>::other;
-		using lock_type = typename std::conditional<Lock, std::mutex, null_lock>::type;
 
 		explicit object_pool(size_type size) : size_(size) {};
 		~object_pool() {
@@ -44,12 +42,6 @@ namespace mtl
 			if (!node)
 				_refill();
 
-			//else
-			//{
-			//	node = free_stack_.top();
-			//	free_stack_.pop();
-			//}
-
 			if (node)
 				allocator_.construct(node, std::forward<Args>(args)...);
 
@@ -58,7 +50,6 @@ namespace mtl
 
 		void release(pointer node)
 		{
-			//std::lock_guard<lock_type> lock_guard(lock_);
 			allocator_.destroy(node);
 			free_stack_.push(static_cast<stack_node*>(node));
 		}
@@ -83,7 +74,5 @@ namespace mtl
 		lock_free::stack<pointer>  free_stack_;
 		allocator_type allocator_;	  // ¸Ä³ÉÖ¸Õë?
 		size_type size_;
-		lock_type lock_;
 	};
 };
-#endif // _H_OBJECT_POOL_H_

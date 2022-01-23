@@ -1,5 +1,4 @@
-#ifndef _HPP_DELEGATE_HPP_
-#define _HPP_DELEGATE_HPP_
+#pragma once
 
 #include <queue>
 #include <functional>
@@ -34,4 +33,3 @@ namespace mtl {
 		std::queue<functor_type> functors_;
 	};
 };
-#endif // _HPP_DELEGATE_HPP_

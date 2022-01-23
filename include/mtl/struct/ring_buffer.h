@@ -1,5 +1,4 @@
-#ifndef _H_CIRCLE_BUFFER_H_
-#define _H_CIRCLE_BUFFER_H_
+#pragma once
 
 #include "common/bitops.h"
 #include "common/noncopyable.h"
@@ -86,4 +85,3 @@ namespace mtl
 		size_type capacity_;
 	};
 }
-#endif // _H_CIRCLE_BUFFER_H_

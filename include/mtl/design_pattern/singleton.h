@@ -1,5 +1,4 @@
-#ifndef _H_SINGLETON_H_
-#define _H_SINGLETON_H_
+#pragma once
 
 #include "common/noncopyable.h"
 
@@ -24,4 +23,3 @@ namespace mtl
 	template <class T>
 	T singleton<T>::instance_;
 };
-#endif // _H_SINGLETON_H_

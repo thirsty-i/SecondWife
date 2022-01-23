@@ -22,10 +22,9 @@ message(${CMAKE_SOURCE_DIR})
 message("hello")
 
 # includes
-target_include_directories(
-	"game_server" PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
+include_directories(
+   ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_definitions(-DXLOCALE_NOT_USED)

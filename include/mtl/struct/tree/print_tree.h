@@ -1,5 +1,4 @@
-#ifndef _H_PRINT_TREE_H_
-#define _H_PRINT_TREE_H_
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -62,5 +61,3 @@ public:
     }
 
 };
-
-#endif // _H_PRINT_TREE_H_

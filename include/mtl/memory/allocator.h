@@ -1,5 +1,4 @@
-#ifndef _H_ALLOCATOR_H_
-#define _H_ALLOCATOR_H_
+#pragma once
 
 #include "construct.h"
 #include <memory>  // address
@@ -64,4 +63,3 @@ namespace mtl {
 	template <class _Type>
 	using allocator = mtl::_new_delete_allocator<_Type>;
 };
-#endif // _H_ALLOCATOR_H_

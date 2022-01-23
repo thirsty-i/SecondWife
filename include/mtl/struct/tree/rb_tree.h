@@ -1,5 +1,4 @@
-#ifndef _H_RB_TREE_H_
-#define _H_RB_TREE_H_
+#pragma once
 
 #include "memory.h"
 #include "bs_tree.h"
@@ -682,5 +681,3 @@ namespace mtl
 		size_type size_;
 	};
 }
-
-#endif // _H_RB_TREE_H_

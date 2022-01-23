@@ -1,5 +1,4 @@
-#ifndef _H_BIT_OPS_H_
-#define _H_BIT_OPS_H_
+#pragma once
 
 #include <type_traits>
 #include <cstdint>
@@ -51,5 +50,3 @@ static integer round_down_pow_of_2(integer x)
 	static_assert(std::is_integral<integer>::value, "param not integral");
 	return (x ? 1 << (fls<integer>(x) - 1): 0);
 }
-
-#endif // _H_BIT_OPS_H_

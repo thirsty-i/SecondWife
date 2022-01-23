@@ -1,7 +1,4 @@
-﻿#ifndef _H_GAME_SERVER_H_
-#define _H_GAME_SERVER_H_
-
+﻿#pragma once
 
 #include <iostream>
 
-#endif // _H_GAME_SERVER_H_

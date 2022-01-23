@@ -1,5 +1,4 @@
-#ifndef _H_MAP_H_
-#define _H_MAP_H_
+#pragma once
 
 #include "mtl/struct/tree/rb_tree.h"
 
@@ -65,5 +64,3 @@ namespace mtl
 		_impl_type rb_tree_;
 	};
 }
-
-#endif //_H_MAP_H_

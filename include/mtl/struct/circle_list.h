@@ -1,5 +1,4 @@
-#ifndef _H_CIRCLE_LIST_H_
-#define _H_CIRCLE_LIST_H_
+#pragma once
 
 #include "mtl/struct/ring_buffer.h"
 
@@ -53,5 +52,3 @@ namespace mtl
 		value_type datas[Size];
 	};
 };
-
-#endif // _H_CIRCLE_LIST_H_
