@@ -29,20 +29,50 @@ int main()
 }
 #endif
 
-#include "mtl/struct/ring_buffer.h"
 #include <cstdio>
 #include <atomic>
+#include <thread>
+#include <future>
+#include "mtl/struct/ring_buffer.h"
+
 #include "mtl/struct/lock_free/stack.h"
+
+struct node 
+	: public mtl::lock_free::stack_node
+{
+	int a;
+
+	node(int x) : a(x) {};
+};
 
 int main()
 {
-	//#pragma omp parallel for num_threads(2*8-1)
-	//	for (int i = 0; i < 1000; ++i)
-	//	{
-	//		X::get_instance();
-	//	}
+	node* nodes = new node[10]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
+	mtl::lock_free::stack stack;
+
+	std::async([&]() {
+		while (true)
+		{
+			for (int i = 0; i < 10; ++i)
+			{
+				stack.push(nodes + i);
+			}
+		}
+	});
 	
+	std::async([&]() {
+		while (true)
+		{
+			for (int i = 0; i < 10; ++i)
+			{
+				stack.pop();
+			}
+		}
+	});
+
+
+	while (true);
 
 	return 0;
 }

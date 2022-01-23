@@ -2,26 +2,23 @@
 
 #include <atomic>
 #include "mtl/struct/lock_free/tagged_ptr.h"
+#include "common/node.h"
 
 namespace mtl {
 namespace lock_free {
 	
-	struct stack_node
-	{
-		stack_node* next;
-	};
-
 	class stack
 	{
-	private:
-		using tagged_ptr_t = tagged_ptr<stack_node>;
 	public:
-		stack() : header_(0) {}
+		using node_t = forward_node;
+		using tagged_ptr_t = tagged_ptr<node_t>;
 
-		void push(stack_node* node)
+		stack() : header_(tagged_ptr_t(0)) {}
+
+		void push(node_t* node)
 		{
 			tagged_ptr_t old_header = header_.load(std::memory_order_acquire);
-			tagged_ptr_t new_header = 0;
+			tagged_ptr_t new_header(0);
 			do
 			{
 				node->next = old_header.get_ptr();
@@ -33,11 +30,11 @@ namespace lock_free {
 								, std::memory_order_relaxed));
 		}
 
-		stack_node* pop()
+		node_t* pop()
 		{ 
 			tagged_ptr_t old_header = header_.load(std::memory_order_acquire);
-			tagged_ptr_t new_header = 0;
-			stack_node* result = 0;
+			tagged_ptr_t new_header(0);
+			node_t* result = 0;
 
 			do
 			{
@@ -46,8 +43,7 @@ namespace lock_free {
 				if (!result)
 					return result;
 
-				new_header.set(result->next, old_header.get_tag() + 1)
-
+				new_header.set(result->next, old_header.get_tag() + 1);
 			} while (header_.compare_exchange_weak(
 								  old_header
 								, new_header

@@ -4,14 +4,14 @@
 #include <cstdint>
 
 template <class integer>
-static uint32_t fls(integer x)
+static integer fls(integer x)
 {
 	static_assert(std::is_integral<integer>::value, "param not integral");
 
 	if (!x)
 		return 0;
 
-	int8_t highest = sizeof(integer) * 8;
+	integer highest = sizeof(integer) * 8;
 	integer bit = highest;
 	integer tmp = -1;
 
