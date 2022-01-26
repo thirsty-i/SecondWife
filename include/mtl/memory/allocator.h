@@ -1,65 +1,23 @@
 #pragma once
 
-#include "construct.h"
-#include <memory>  // address
+template <class T>
+class allocator
+{
+	using value_t = T;
+	using pointer_t = T*;
 
-namespace mtl {
-	template <class T>
-	class _new_delete_allocator
+	pointer_t allocate(size_t count)
 	{
-	public:
-		typedef T  value_type;
-		typedef T* pointer;
-		typedef T& reference;
-		typedef size_t size_type;
-		typedef void* void_pointer;
-		typedef ptrdiff_t  difference_type;
-		typedef const T* const_pointer;
-		typedef const T& const_reference;
+		void* const p = do_allocate(count * sizeof(value_t), alignof(value_t));
+		return static_cast<pointer_t>(p);
+	}
 
-		template <class _Up>
-		struct rebind
-		{
-			typedef _new_delete_allocator<_Up> other;
-		};
+	void deallocate(value_t* const ptr, size_t count)
+	{
+		do_deallocate(ptr, sizeof(value_t) * count, alignof(value_t));
+	}
 
-		_new_delete_allocator() noexcept {}
-		_new_delete_allocator(const _new_delete_allocator&) noexcept {}
-
-		template <class _Up>
-		_new_delete_allocator(const _new_delete_allocator<_Up>&) noexcept {}
-		~_new_delete_allocator() noexcept {}
-
-		pointer allocate(size_type n)
-		{
-			if (n == 0)
-				return 0;
-			// 这里可以做一些字节对齐
-			return static_cast<pointer>(::operator new(sizeof(T) * n));
-		}
-
-		void deallocate(pointer p)
-		{
-			::operator delete(p);
-		}
-
-		template <class... Args>
-		void construct(pointer __p, Args&&... args)
-		{
-			::construct(__p, std::forward<Args>(args)...);
-		}
-
-		void destroy(pointer __p)
-		{
-			::destroy(__p);
-		}
-
-		size_type max_size() const { return size_type(-1) / sizeof(value_type); }
-
-		pointer address(reference __x) const noexcept { return std::addressof(__x); }
-		const_pointer address(const_reference __x) const noexcept { return std::addressof(__x); }
-	};
-
-	template <class _Type>
-	using allocator = mtl::_new_delete_allocator<_Type>;
+private:
+	virtual void* do_allocate(size_t bytes, size_t alignment) = 0;
+	virtual void do_deallocate(void* ptr, size_t bytes, size_t alignment) = 0;
 };
