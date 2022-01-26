@@ -33,46 +33,38 @@ int main()
 #include <atomic>
 #include <thread>
 #include <future>
+#include <iostream>
 #include "mtl/struct/ring_buffer.h"
+#include "mtl/pool/unbounded_object_pool.h"
+#include "mtl/pool/bounded_object_pool.h"
+#include "common/logger/log.h"
 
-#include "mtl/struct/lock_free/stack.h"
-
-struct node 
-	: public mtl::lock_free::stack_node
+struct test
 {
 	int a;
-
-	node(int x) : a(x) {};
 };
 
 int main()
 {
-	node* nodes = new node[10]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	g_init_log("game_server");
 
-	mtl::lock_free::stack stack;
+	//mtl::unbounded_object_pool<test, 1> aaa;
+	//{
+	//	std::shared_ptr<test> bbb = aaa.allocate();
 
-	std::async([&]() {
-		while (true)
-		{
-			for (int i = 0; i < 10; ++i)
-			{
-				stack.push(nodes + i);
-			}
-		}
-	});
+	//	std::shared_ptr<test> ccc = aaa.allocate();
+	//	int a = 10;
+	//}
 	
-	std::async([&]() {
-		while (true)
-		{
-			for (int i = 0; i < 10; ++i)
-			{
-				stack.pop();
-			}
-		}
-	});
+	mtl::bounded_object_pool<test, 1> aaa;
+	{
+		std::shared_ptr<test> bbb = aaa.allocate();
+		std::shared_ptr<test> ccc = aaa.allocate();
 
-
-	while (true);
+		LOG_CHECK_ERROR(bbb);
+		LOG_CHECK_ERROR(ccc);
+		ccc->a = 10;
+	}
 
 	return 0;
 }

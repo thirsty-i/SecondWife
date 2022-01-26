@@ -7,13 +7,13 @@ namespace lock_free {
 	class tagged_ptr
 	{
 	public:
-		using value_type = T;
 		using pointer = T*;
 		using tag_type = uint16_t;
+		using compressed_ptr_t = uint64_t;
 
 		union cast_unit
 		{
-			pointer ptr;
+			compressed_ptr_t ptr;
 			struct 
 			{
 				unsigned reserved_1 : 32;
@@ -21,6 +21,8 @@ namespace lock_free {
 				unsigned tag : 16;
 			};
 		};
+
+		static const compressed_ptr_t ptr_mask = 0xffffffffffffUL; //(1L<<48L)-1;
 
 		static_assert(sizeof(void*) == 8, "tagged_ptr_t is not equal in size to original pointer");
 		static_assert(sizeof(cast_unit) == 8, "cast_unit size error");
@@ -30,17 +32,35 @@ namespace lock_free {
 
 		tagged_ptr& operator= (tagged_ptr const& p) = default;
 
-		pointer get_ptr() { return cu_.ptr; }
-		tag_type get_tag() { return cu_.tag; }
+		pointer get_ptr() 
+		{ 
+			return reinterpret_cast<pointer>(cu_.ptr & ptr_mask); 
+		}
 
-		void set_ptr(pointer ptr) { cu_.ptr = ptr; }
-		void set_tag(tag_type tag) { cu_.tag = tag; }
-		void set(pointer ptr, tag_type tag) { cu_ = _make(ptr, tag); }
+		tag_type get_tag() 
+		{
+			return cu_.tag; 
+		}
+
+		void set_ptr(pointer ptr) 
+		{ 
+			set(ptr, get_tag());
+		}
+
+		void set_tag(tag_type tag) 
+		{ 
+			cu_.tag = tag; 
+		}
+		
+		void set(pointer ptr, tag_type tag) 
+		{ 
+			cu_ = _make(ptr, tag); 
+		}
 	private:
 		cast_unit _make(pointer ptr, tag_type tag)
 		{
 			cast_unit cu;
-			cu.ptr = ptr;
+			cu.ptr = reinterpret_cast<compressed_ptr_t>(ptr);
 			cu.tag = tag;
 			return cu;
 		}
