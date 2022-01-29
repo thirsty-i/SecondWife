@@ -1,81 +1,135 @@
 #pragma once
 
-#include "common/noncopyable.h"
-#include <list>
-#include <memory>
-#include <functional>
-#include <type_traits>
-#include "common/logger/log.h"
+#include "mtl/memory/chunk.h"
+#include "mtl/memory/memory_resource.h"
+#include "mtl/memory/allocator.h"
 
 namespace mtl {
-template <class T>
-class chunk_pool final
-	: private noncopyable
+class chunk_pool
 {
 public:
-	using chunk_t = T;
-	using size_type = size_t;
-	using shared_ptr_t = std::shared_ptr<chunk_t>;
+	using chunk_t = mtl::chunk;
 
-	typedef size_type(*func_type)(size_type, size_type);
-
-	chunk_pool(func_type func = &_get_recycle_number) 
-		: func_(func)
-		, chunk_cnt_(0) {};
-
-	void deallocate(shared_ptr_t&& chunk)
+	chunk_pool(size_t block_size, size_t blocks, size_t recycle_rate = 100, memory_resource* resource = get_new_delete_resource())
+		: block_size_(block_size)
+		, blocks_(blocks)
+		, recycle_rate_(recycle_rate)
+		, resource_(resource)
 	{
-		free_list.push_back(std::move(chunk));
-		_recyclable();
+		LOG_PROCESS_ERROR(block_size_);
+		LOG_PROCESS_ERROR(blocks_);
+		LOG_PROCESS_ERROR(recycle_rate_);
+		LOG_PROCESS_ERROR(resource_);
+
 	}
 
-	template <class... Args>
-	shared_ptr_t allocate(Args&&... args)
+	void* allocate()
 	{
-		shared_ptr_t res;
-		if (free_list.empty())
+		if (void* p = _try_allocate())
+			return p;
+
+		_fill();
+		return chunks_.back().pop();
+	}
+
+	void deallocate(void* ptr)
+	{
+		LOG_PROCESS_ERROR(!chunks_.empty());
+		LOG_PROCESS_ERROR(ptr);
+
+		// The last piece of no recovery
+		if (chunks_.back().is_from(ptr))
 		{
-			res = std::make_shared<chunk_t>(std::forward<Args>(args)...);
-			++chunk_cnt_;
-		}
-		else
-		{
-			res.swap(free_list.front());
-			free_list.pop_front();
+			chunks_.back().push(ptr);
+			return;
 		}
 
-		return res;
+		for (chunk_t& chunk : chunks_)
+		{
+			if (chunk.is_from(ptr))
+			{
+				chunk.push(ptr);
+				_try_recycle(chunk);
+				return;
+			}
+		}
+		LOG(ERROR) << "ptr:" << ptr
+			"is not from this";
 	}
+
 
 private:
-	static size_t _get_recycle_number(size_type free_cnt, size_type total_cnt)
+	void _fill()
 	{
-		enum { RECYCLE = 2 };
-		return free_cnt - (total_cnt - free_cnt + RECYCLE) / RECYCLE;
+		mtl::allocator<char> allocator(memory_resource_);
+		std::unique_ptr<char> res(allocator.allocate(blocks_), [&](char* ptr) {
+			allocator.deallocate(ptr, blocks_);
+		});
+
+		chunks_.emplace_back(res.get(), blocks_ * block_size_, block_size_);
+
+		res.release();
 	}
 
-	void _recyclable()
+	void _try_recycle(chunk_t& chunk)
 	{
-		size_t number = func_(free_list.size(), chunk_cnt_);
-		
-		if (!number)
+		if (!chunk.full())
 			return;
 
-		LOG_PROCESS_ERROR(number <= free_list.size());
-
-		free_list.remove_if([&number, this](shared_ptr_t&) { 
-			if (number--)
-			{
-				--chunk_cnt_;
-				return true;
-			}
-			return false;
-		});
+		if (_can_recycle())
+		{
+			resource_->deallocate(chunk.origer_ptr_, chunk.bytes_);
+			// chunk it's not the back
+			std::swap(chunk, chunks_.back());
+			chunks_.pop_back();
+		}
+		return;
 	}
 
-private:
-	func_type func_;
-	std::list<shared_ptr_t> free_list; 
-	size_type chunk_cnt_;
+	bool _can_recycle()
+	{
+		size_t free_cnt = 0;
+
+		for (chunk_t& chunk : chunks_)
+		{
+			if (chunk.full())
+				++free_cnt;
+		}
+
+		enum { MAX_RATE = 100 };
+		return (chunks_.size() - free_cnt) * recycle_rate_ / MAX_RATE;
+	}
+
+	void* _try_allocate()
+		noexcept(std::is_nothrow_move_assignable<chunk_t>::value
+			&& std::is_nothrow_move_assignable<chunk_t>::value)
+	{
+		if (chunks_.empty())
+			return 0;
+
+		chunk_t& free_chunk = chunks_.back();
+		if (void* p = free_chunk.pop())
+			return p;
+
+		if (chunks_.size() == 1)
+			return 0;
+
+		void* p = 0;
+		for (chunk_t& chunk : chunks_)
+		{
+			if (p = chunk.pop())
+			{
+				std::swap(free_chunk, chunk);
+				break;
+			}
+		}
+
+		return p;
+	}
+
+	size_t block_size_;
+	size_t blocks_;
+	size_t recycle_rate_;
+	std::vector<chunk_t> chunks_; // 这里要传一个小内存分配器
 };
-}
+};

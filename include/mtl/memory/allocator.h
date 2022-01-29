@@ -1,35 +1,82 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
 #include "common/noncopyable.h"
 #include "memory_resource.h"
 #include "common/logger/log.h"
 
+namespace mtl {
+// adapt STL	
 template <class T>
-class allocator : private noncopyable
+class allocator
 {
 public:
-	using value_t = T;
-	using pointer_t = T*;
-	using resource_smart_ptr_t = memory_resource::resource_smart_ptr_t;
+	typedef T  value_type;
+	typedef T* pointer;
+	typedef T& reference;
+	typedef size_t size_type;
+	typedef void* void_pointer;
+	typedef ptrdiff_t  difference_type;
+	typedef const T* const_pointer;
+	typedef const T& const_reference;
 
-	// TODO: 添加默认参数
-	allocator(resource_smart_ptr_t&& resource) : resource_(resource) 
+	template <class _Up>
+	struct rebind
 	{
-		LOG_PROCESS_ERROR_RET(resource_)
+		typedef allocator<_Up> other;
 	};
 
-	pointer_t allocate(size_t count)
+	static_assert(sizeof(T), "T size is zero!!!");
+
+	allocator(memory_resource* const resource = get_new_delete_resource()) noexcept // strengthened
+		: resource_(resource) 
+	
 	{
-		void* const p = resource_->allocate(count * sizeof(value_t), alignof(value_t));
-		return static_cast<pointer_t>(p);
+		LOG_PROCESS_ERROR(resource_);
+	};
+
+	allocator(const allocator&) = default;
+
+	template <class _Uty>
+	allocator(const allocator<_Uty>& other) noexcept
+		: resource_(other.resource_) {} // initialize with _That's resource;
+
+	allocator& operator=(const allocator&) = delete;
+
+	pointer allocate(size_t count)
+	{
+		LOG_PROCESS_ERROR_RET(count, 0);
+
+		void* const p = resource_->allocate(count * sizeof(T), alignof(T));
+		return static_cast<pointer>(p);
 	}
 
-	void deallocate(value_t* const ptr, size_t count)
+	void deallocate(T* const ptr, size_t count)
 	{
-		resource_->deallocate(ptr, sizeof(value_t) * count, alignof(value_t));
+		LOG_PROCESS_ERROR(ptr);
+		LOG_PROCESS_ERROR(count);
+
+		resource_->deallocate(ptr, sizeof(T) * count, alignof(T));
 	}
+
+	template<class ...Args>
+	void construct(pointer ptr, Args&&... args)
+	{
+		::new ((void*)ptr) T(std::forward<Args>(args)...);
+	}
+
+	void destroy(pointer ptr)
+	{
+		ptr->~T();
+	}
+
+	size_type max_size() const { return size_type(-1) / sizeof(value_type); }
+
+	pointer address(reference __x) const noexcept { return std::addressof(__x); }
+	const_pointer address(const_reference __x) const noexcept { return std::addressof(__x); }
 
 private:
-	resource_smart_ptr_t resource_;
+	memory_resource* resource_;
 };
+} // namsapace mtl
