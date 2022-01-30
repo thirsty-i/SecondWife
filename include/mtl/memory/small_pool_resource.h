@@ -10,7 +10,10 @@ class small_pool_resource final
 	, private noncopyable
 {
 public:
-	small_pool_resource(memory_resource* resource = get_new_delete_resource()) 
+	small_pool_resource()
+		: small_pool_resource(get_new_delete_resource()) {}
+
+	small_pool_resource(memory_resource* resource) 
 		: allocator_(resource)
 	{
 		LOG_PROCESS_ERROR(resource);
@@ -21,7 +24,7 @@ public:
 		for (size_t i = 0; i < SMALL_POOLS; ++i)
 		{
 			size_t block_size = ALIGN + i * ALIGN;
-			allocator_.construct(pools_ + i, block_size, (size_t)4096 / block_size); // 4096替换为一页大小
+			allocator_.construct(pools_ + i, block_size, (size_t)POOL_BYTES / block_size);
 		}
 	}
 
@@ -64,6 +67,7 @@ private:
 	enum { ALIGN = alignof(void*) };
 	enum { MAX_BYTES = 128 };
 	enum { SMALL_POOLS = MAX_BYTES / ALIGN };
+	enum { POOL_BYTES = 4096 };
 
 	using pool_t = mtl::chunk_pool;
 

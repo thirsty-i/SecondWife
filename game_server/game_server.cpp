@@ -30,20 +30,13 @@ int main()
 #endif
 
 #include <cstdio>
-#include <atomic>
-#include <thread>
-#include <future>
 #include <iostream>
+#include "game_server.h"
+
 //#include "mtl/struct/ring_buffer.h"
-//#include "mtl/pool/unbounded_object_pool.h"
-//#include "mtl/pool/bounded_object_pool.h"
 #include "common/logger/log.h"
 #include "mtl/pool/object_pool.h"
-//#include "mtl/struct/chunk.h"
-
-#include <unistd.h>
-
-#include "game_server.h"
+#include "mtl/memory/small_pool_resource.h"
 
 struct test
 {
@@ -54,35 +47,13 @@ struct test
 
 int main()
 {
-	
-
-	object_pool<A> a_pool(1024);
-	object_pool<B> b_pool(1024);
-
-	std::shared_ptr<A> a = a_pool.create();
-	std::shared_ptr<B> b = b_pool.create();
-
 	g_init_log(game_server::instance().server_name());
 
-	//mtl::unbounded_object_pool<test, 1> aaa;
-	//{
-	//	std::shared_ptr<test> bbb = aaa.allocate();
+	//object_pool<A> a_pool(1024);
+	//object_pool<B> b_pool(1024);
 
-	//	std::shared_ptr<test> ccc = aaa.allocate();
-	//	int a = 10;
-	//}
-	
-	//mtl::bounded_object_pool<test, 1> aaa;
-	//{
-	//	std::shared_ptr<test> bbb = aaa.allocate();
-	//	std::shared_ptr<test> ccc = aaa.allocate();
-
-	//	LOG_CHECK_ERROR(bbb);
-	//	LOG_CHECK_ERROR(ccc);
-	//	ccc->a = 10;
-	//}
-
-
+	//std::shared_ptr<A> a = a_pool.create();
+	//std::shared_ptr<B> b = b_pool.create();
 
 	//test* ts = allocator.allocate(1);
 	//printf("1. ts:%p, a:%d\n", ts, ts->a);
@@ -96,7 +67,10 @@ int main()
 	//ts = allocator.allocate(1);
 	//printf("1. ts:%p, a:%d\n", ts, ts->a);
 
+	//mtl::small_pool_resource small_pool;
 
+	mtl::object_pool<test> pool_a;
+	std::shared_ptr<test> shared_a = pool_a.create(10);
 
 	return 0;
 }

@@ -73,9 +73,8 @@ namespace mtl {
 		bool is_from(void* ptr) noexcept
 		{
 			return ptr >= reinterpret_cast<char*>(origer_ptr_)
-				&& ptr <= reinterpret_cast<char*>(origer_ptr_) + bytes_;
+				&& ptr < reinterpret_cast<char*>(origer_ptr_) + bytes_;
 		}
-
 
 		size_t bytes_;
 		void* origer_ptr_;

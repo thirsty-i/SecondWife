@@ -1,16 +1,20 @@
-#pragma  once
+#pragma once
 
-#include "memory_resource.h"
+#include "mtl/memory/memory_resource.h"
+#include "mtl/memory/allocator.h"
+#include "mtl/memory/chunk.h"
 #include "chunk_pool.h"
-#include "allocator.h"
-#include "chunk.h"
 #include <type_traits>
 
+namespace mtl {
 template<class T>
 class object_pool
 {
 public:
-	object_pool(size_t size)
+	object_pool()
+		: object_pool(DEFAULT_SIZE, get_new_delete_resource()) {}
+
+	object_pool(size_t size, memory_resource* resource)
 		: allocator_(resource)
 		, init_size_(size)
 		, chunk_pool_(sizeof(T), init_size_, 50)
@@ -22,23 +26,30 @@ public:
 	template<class ...Args>
 	std::shared_ptr<T> create(Args&&... args)
 	{
-		std::shared_ptr<T> res(chunk_pool_.allocate(), [this](T* ptr) {
+		static auto deleter = [&](T* ptr) {
 			release(ptr);
-		});
+		};
 
-		LOG_PROCESS_ERROR(res.get());
+		std::shared_ptr<T> res((T*)chunk_pool_.allocate(), deleter);
+
+		LOG_PROCESS_ERROR_RET(res, res);
 
 		allocator_.construct(res.get(), std::forward<Args>(args)...);
 
 		return res;
 	}
 
-	void release(void* ptr)
+	void release(T* ptr) noexcept(noexcept(allocator_.destroy(ptr)))
 	{
 		allocator_.destroy(ptr);
 		chunk_pool_.deallocate(ptr);
 	}
+
 private:
+	enum { DEFAULT_SIZE = 1024 };
+
+	const size_t init_size_;
 	mtl::chunk_pool chunk_pool_;
 	mtl::allocator<T> allocator_;
 };
+}; // namespace mtl

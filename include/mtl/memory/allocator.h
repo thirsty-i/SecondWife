@@ -12,14 +12,14 @@ template <class T>
 class allocator
 {
 public:
-	typedef T  value_type;
-	typedef T* pointer;
-	typedef T& reference;
-	typedef size_t size_type;
-	typedef void* void_pointer;
-	typedef ptrdiff_t  difference_type;
-	typedef const T* const_pointer;
-	typedef const T& const_reference;
+	using value_type = T;
+	using pointer = T*;
+	using reference = T&;
+	using size_type = size_t;
+	using void_pointer = void*;
+	using difference_type = ptrdiff_t;
+	using const_pointer = const T*;
+	using const_reference = const T&;
 
 	template <class _Up>
 	struct rebind

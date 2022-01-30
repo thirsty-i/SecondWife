@@ -15,6 +15,5 @@ private:
 
 private:
 
-	mtl::pool_resource pool_resource_;
 	friend class mtl::singleton<game_server>;
 };

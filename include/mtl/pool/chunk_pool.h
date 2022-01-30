@@ -10,7 +10,13 @@ class chunk_pool
 public:
 	using chunk_t = mtl::chunk;
 
-	chunk_pool(size_t block_size, size_t blocks, size_t recycle_rate = 100, memory_resource* resource = get_new_delete_resource())
+	chunk_pool(size_t block_size, size_t blocks)
+		: chunk_pool(block_size, blocks, MAX_RATE) {};
+
+	chunk_pool(size_t block_size, size_t blocks, size_t recycle_rate)
+		: chunk_pool(block_size, blocks, recycle_rate, get_new_delete_resource()) {};
+
+	chunk_pool(size_t block_size, size_t blocks, size_t recycle_rate, memory_resource* resource)
 		: block_size_(block_size)
 		, blocks_(blocks)
 		, recycle_rate_(recycle_rate)
@@ -22,6 +28,7 @@ public:
 		LOG_PROCESS_ERROR(resource_);
 
 	}
+
 
 	void* allocate()
 	{
@@ -54,20 +61,30 @@ public:
 			}
 		}
 		LOG(ERROR) << "ptr:" << ptr
-			"is not from this";
+			<< "is not from this";
+	}
+
+	void free_all()
+	{
+		for (auto& chunk : chunks_)
+		{
+			resource_->deallocate(chunk.origer_ptr_, chunk.bytes_);
+		}
+		chunks_.clear();
 	}
 
 
 private:
 	void _fill()
 	{
-		mtl::allocator<char> allocator(memory_resource_);
-		std::unique_ptr<char> res(allocator.allocate(blocks_), [&](char* ptr) {
-			allocator.deallocate(ptr, blocks_);
-		});
+		size_t bytes = blocks_ * block_size_;
+		static auto deleter = [&](void* ptr) {
+			resource_->deallocate(ptr, bytes);
+		};
 
+		// emplace_back may throw an exception, use unique_ptr to ensure exception safety
+		std::unique_ptr<void, decltype(deleter)> res(resource_->allocate(bytes), deleter);
 		chunks_.emplace_back(res.get(), blocks_ * block_size_, block_size_);
-
 		res.release();
 	}
 
@@ -96,7 +113,6 @@ private:
 				++free_cnt;
 		}
 
-		enum { MAX_RATE = 100 };
 		return (chunks_.size() - free_cnt) * recycle_rate_ / MAX_RATE;
 	}
 
@@ -111,25 +127,31 @@ private:
 		if (void* p = free_chunk.pop())
 			return p;
 
+		// no more blocks
 		if (chunks_.size() == 1)
 			return 0;
 
 		void* p = 0;
 		for (chunk_t& chunk : chunks_)
 		{
-			if (p = chunk.pop())
-			{
+			if (!(p = chunk.pop()))
+				continue;
+
+			// This block is not full, move to the back
+			if(!chunk.empty())
 				std::swap(free_chunk, chunk);
-				break;
-			}
+			break;
 		}
 
 		return p;
 	}
 
+private:
+	enum { MAX_RATE = 100 };
 	size_t block_size_;
 	size_t blocks_;
 	size_t recycle_rate_;
-	std::vector<chunk_t> chunks_; // 这里要传一个小内存分配器
+	std::vector<chunk_t> chunks_; // 这里要传一个小内存分配器???
+	memory_resource* resource_;
 };
 };
