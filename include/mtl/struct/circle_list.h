@@ -4,9 +4,8 @@
 
 namespace mtl
 {
-	template <class T, size_t Size>
-	class circle_list
-		: private ring_buffer
+	template <class T>
+	class circle_list final
 	{
 	public:
 		using value_type = T;
@@ -23,8 +22,8 @@ namespace mtl
 		
 		static_assert(std::is_pod<value_type>, "T is not POD");
 
-		circle_list()
-			: ring_buffer(datas, sizeof(datas))
+		circle_list(const size_t size, memory_resource* resource = get_new_delete_resource())
+			: ring_buffer_(size, resource)
 		{};
 
 		bool push(const_reference data)
@@ -32,7 +31,7 @@ namespace mtl
 			if (full())
 				return false;
 
-			write(data, _data_size());
+			ring_buffer_.write(data, _data_size());
 		}
 
 		bool pop(reference data)
@@ -40,7 +39,7 @@ namespace mtl
 			if (empty())
 				return false;
 
-			read(data, _data_size());
+			ring_buffer_.read(data, _data_size());
 			return true;
 		}
 
@@ -49,6 +48,6 @@ namespace mtl
 	private:
 		constexpr size_type _data_size() { return sizeof(T); }
 	private:
-		value_type datas[Size];
+		ring_buffer ring_buffer_;
 	};
 };

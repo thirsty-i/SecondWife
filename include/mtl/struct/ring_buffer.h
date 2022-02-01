@@ -2,6 +2,7 @@
 
 #include "common/bitops.h"
 #include "common/noncopyable.h"
+#include "mtl/memory/memory_resource.h"
 #include <assert.h>
 #include <cstring>
 #include <atomic>
@@ -9,30 +10,26 @@
 
 namespace mtl
 {
-	class ring_buffer
+	// single in single out safe
+	class ring_buffer final
 		: private noncopyable
 	{
 	public:
 		using value_type = char;
 		using size_type = size_t;
-
 		using pointer = value_type*;
 		using void_pointer = void*;
 
-		explicit ring_buffer(pointer buffer, const size_type size)
+		ring_buffer(const size_type size, memory_resource* resource = get_new_delete_resource())
+			: resource_(resource)
 		{
-			reset(buffer, round_down_pow_of_2(size));
+			LOG_PROCESS_ERROR(resource_);
+			LOG_PROCESS_ERROR(size >= 2);
+
+			size_t bytes = round_down_pow_of_2(size);
+			_reset(resource_->allocate(bytes, 1), bytes);
 		}
 
-		void reset(pointer buffer, const size_type size)
-		{
-			assert(size >= 2);
-			assert(buffer);
-
-			buffer_ = buffer;
-			in_ = out_ = 0;
-			capacity_ = size;
-		}
 
 		size_type read(pointer dst, size_type len)
 		{
@@ -60,6 +57,15 @@ namespace mtl
 		size_type get_used() { return in_ - out_; }
 
 	private:
+		void _reset(pointer buffer, const size_type size)
+		{
+			LOG_PROCESS_ERROR(buffer);
+
+			buffer_ = buffer;
+			in_ = out_ = 0;
+			capacity_ = size;
+		}
+
 		void _copy_in(pointer src, size_type len)
 		{
 			size_type off = in_ & (capacity_ - 1);
@@ -78,10 +84,16 @@ namespace mtl
 			memcpy(dst + copy_len, buffer_, len - copy_len);
 		}
 
+		~ring_buffer()
+		{
+			resource_->deallocate(buffer_);
+		}
+
 	private:
 		alignas(64) size_type in_;
 		alignas(64) size_type out_;
 		pointer buffer_;
 		size_type capacity_;
+		memory_resource* resource_;
 	};
 }
