@@ -2,12 +2,16 @@
 #if PLATFORM == LINUX
 #include "epoll.h"
 #include <sys/epoll.h>
+#include <fcntl.h>
+
+#include "socket_ops.h"
+
 namespace net {
 epoll::epoll()
-	: session_pool_(1024)
+	: descriptor_pool_(1024)
 	, epoll_fd_(_epoll_create())
 {
-	
+	LOG(DEBUG) << "hello";
 }
 
 int epoll::_epoll_create()
@@ -21,9 +25,17 @@ int epoll::_epoll_create()
 	return fd;
 }
 
-bool register_descriptor(int descriptor)
+bool epoll::register_descriptor(int descriptor)
 {
-	
+	return true;
+}
+
+void epoll::set_non_block(int descriptor)
+{
+	int flags = fcntl(descriptor, F_GETFL);
+	flags = flags | O_NONBLOCK;
+	fcntl(descriptor, F_SETFL, flags);
+	return;
 }
 
 };
