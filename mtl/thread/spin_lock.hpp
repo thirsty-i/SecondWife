@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/noncopyable.h"
+#include "../common/noncopyable.h"
 #include <atomic>
 
 class spin_lock

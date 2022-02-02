@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common/bitops.h"
-#include "common/noncopyable.h"
+#include "../common/bitops.h"
+#include "../common/noncopyable.h"
 #include "mtl/memory/memory_resource.h"
 #include <assert.h>
 #include <cstring>

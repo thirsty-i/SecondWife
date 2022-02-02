@@ -1,8 +1,8 @@
 #pragma once
 
-#include "mtl/memory/chunk.h"
-#include "mtl/memory/memory_resource.h"
-#include "mtl/memory/allocator.h"
+#include "../memory/chunk.h"
+#include "../memory/memory_resource.h"
+#include "../memory/allocator.h"
 
 namespace mtl {
 class chunk_pool

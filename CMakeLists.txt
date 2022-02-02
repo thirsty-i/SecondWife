@@ -20,9 +20,12 @@ message("hello")
 
 # includes
 include_directories(
-   ${CMAKE_CURRENT_SOURCE_DIR}/include
-   ${CMAKE_CURRENT_SOURCE_DIR}/common/logger
+   ${CMAKE_CURRENT_SOURCE_DIR}/mtl
+   ${CMAKE_CURRENT_SOURCE_DIR}/common
+   ${CMAKE_CURRENT_SOURCE_DIR}/net
 )
 
-#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include)
 add_definitions(-DXLOCALE_NOT_USED)
+add_subdirectory("net")
+add_subdirectory("common")
+

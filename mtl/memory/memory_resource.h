@@ -1,9 +1,9 @@
 #pragma once 
 
 #include <cstddef>
-#include "common/bitops.h"
-#include "common/logger/log.h"
-#include "common/noncopyable.h"
+#include "../common/bitops.h"
+#include "../common/logger/log.h"
+#include "../common/noncopyable.h"
 
 class memory_resource
 {
@@ -49,7 +49,7 @@ protected:
 
 	virtual void do_deallocate(void* ptr, const size_t bytes, const size_t align) override
 	{
-		::operator delete(ptr, bytes);
+		::operator delete(ptr);
 	}
 };
 

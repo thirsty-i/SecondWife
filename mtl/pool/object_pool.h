@@ -1,8 +1,8 @@
 #pragma once
 
-#include "mtl/memory/memory_resource.h"
-#include "mtl/memory/allocator.h"
-#include "mtl/memory/chunk.h"
+#include "memory/memory_resource.h"
+#include "memory/allocator.h"
+#include "memory/chunk.h"
 #include "chunk_pool.h"
 #include <type_traits>
 
@@ -11,10 +11,7 @@ template<class T>
 class object_pool
 {
 public:
-	object_pool()
-		: object_pool(DEFAULT_SIZE, get_new_delete_resource()) {}
-
-	object_pool(size_t size, memory_resource* resource)
+	object_pool(size_t size = DEFAULT_SIZE, memory_resource* resource = get_new_delete_resource())
 		: allocator_(resource)
 		, init_size_(size)
 		, chunk_pool_(sizeof(T), init_size_, 50)
@@ -39,7 +36,7 @@ public:
 		return res;
 	}
 
-	void release(T* ptr) noexcept(noexcept(allocator_.destroy(ptr)))
+	void release(T* ptr)
 	{
 		allocator_.destroy(ptr);
 		chunk_pool_.deallocate(ptr);

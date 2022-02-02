@@ -1,10 +1,10 @@
 #pragma once
 
-#include "common/noncopyable.h"
+#include "../common/noncopyable.h"
 #include "mtl/struct/lock_free/tagged_ptr.h"
 #include <type_traits>
 #include <memory>
-#include "common/logger/log.h"
+#include "../common/logger/log.h"
 
 namespace mtl {
 // not thread safe

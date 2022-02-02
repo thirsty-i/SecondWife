@@ -5,8 +5,6 @@
 #define ELPP_STL_LOGGING
 #define ELPP_THREAD_SAFE
 
-INITIALIZE_EASYLOGGINGPP
-
 
 #define LOG_CHECK_ERROR(__condition__) \
 	do											  \
@@ -45,15 +43,4 @@ INITIALIZE_EASYLOGGINGPP
 		}										  \
 	} while (0)									  \
 
-void g_init_log(std::string&& strAppName)
-{
-	std::string config_path = "../../../../configs/" + strAppName + ".conf";
-
-	el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
-	el::Loggers::addFlag(el::LoggingFlag::StrictLogFileSizeCheck);
-	el::Loggers::addFlag(el::LoggingFlag::DisableApplicationAbortOnFatalLog);
-
-
-	el::Configurations conf(config_path);
-	el::Loggers::reconfigureAllLoggers(conf);
-}
+void g_init_log(std::string && strAppName);
