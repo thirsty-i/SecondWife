@@ -1,4 +1,7 @@
 #pragma once
+#include "platform.h"
+#if PLATFORM == LINUX
+
 #include "pool/object_pool.h"
 #include "session.h"
 
@@ -7,6 +10,7 @@ class epoll
 {
 public:
 	epoll();
+	
 private:
 	int _epoll_create();
 private:
@@ -15,3 +19,4 @@ private:
 	mtl::object_pool<session> session_pool_;
 };
 }; // namespace net
+#endif // PLATFORM == LINUX

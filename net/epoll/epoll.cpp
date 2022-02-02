@@ -1,6 +1,7 @@
+#include "platform.h"
+#if PLATFORM == LINUX
 #include "epoll.h"
 #include <sys/epoll.h>
-
 namespace net {
 epoll::epoll()
 	: session_pool_(1024)
@@ -19,4 +20,11 @@ int epoll::_epoll_create()
 
 	return fd;
 }
+
+bool register_descriptor(int descriptor)
+{
+	
+}
+
 };
+#endif // PLATFORM == LINUX

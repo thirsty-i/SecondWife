@@ -5,11 +5,7 @@
 game_server::game_server()
 	: service_()
 {
-#if PLAT_FORM == LINUX
-	LOG(DEBUG) << "11111";
-#elif PLAT_FORM == WINDOWS
-	LOG(DEBUG) << "2222";
-#endif
+
 }
 
 bool game_server::start()
