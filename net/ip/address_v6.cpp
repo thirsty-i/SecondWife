@@ -1,10 +1,9 @@
-# pragma once
 
 #include "address_v6.h"
 #include "socket_ops.h"
 
 namespace net {
-
+namespace ip {
 address_v6::address_v6() noexcept
 	: addr_(),
 	scope_id_(0)
@@ -36,13 +35,11 @@ address_v6::address_v6(const address_v6& other) noexcept
 {
 }
 
-#if defined(ASIO_HAS_MOVE)
 address_v6::address_v6(address_v6&& other) noexcept
 	: addr_(other.addr_),
 	scope_id_(other.scope_id_)
 {
 }
-#endif // defined(ASIO_HAS_MOVE)
 
 address_v6& address_v6::operator=(const address_v6& other) noexcept
 {
@@ -51,14 +48,12 @@ address_v6& address_v6::operator=(const address_v6& other) noexcept
 	return *this;
 }
 
-#if defined(ASIO_HAS_MOVE)
 address_v6& address_v6::operator=(address_v6&& other) noexcept
 {
 	addr_ = other.addr_;
 	scope_id_ = other.scope_id_;
 	return *this;
 }
-#endif // defined(ASIO_HAS_MOVE)
 
 address_v6::bytes_type address_v6::to_bytes() const noexcept
 {
@@ -260,5 +255,5 @@ address_v6 make_address_v6(
 		0xFF, 0xFF, v4_bytes[0], v4_bytes[1], v4_bytes[2], v4_bytes[3] } };
 	return address_v6(v6_bytes);
 }
-
+} // namespace ip
 } // namespace net

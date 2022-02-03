@@ -1,10 +1,11 @@
-# pragma once
+#pragma once
 
 #include "address_v4.h"
 #include "address_v6.h"
 #include <string>
 
 namespace net {
+namespace ip {
 class address
 {
 public:
@@ -13,7 +14,6 @@ public:
     address(
         const address_v4& ipv4_address) noexcept;
 
-    /// Construct an address from an IPv6 address.
     address(
         const address_v6& ipv6_address) noexcept;
 
@@ -22,7 +22,6 @@ public:
     address(address&& other) noexcept;
 
     address& operator=(const address& other) noexcept;
-
     address& operator=(address&& other) noexcept;
 
     address& operator=(
@@ -91,11 +90,11 @@ private:
     enum { ipv4, ipv6 } type_;
 
     address_v4 ipv4_address_;
-
     address_v6 ipv6_address_;
 };
 
-address make_address(const char* str);
+address make_address(const char* str) noexcept;
 
-address make_address(const std::string& str);
+address make_address(const std::string& str) noexcept;
+} // namespace ip
 } // namespace net

@@ -3,7 +3,7 @@
 #include "socket_ops.h"
 
 namespace net {
-	endpoint::endpoint() 
+	endpoint::endpoint() noexcept
 		: data_()
 	{
 		data_.v4.sin_family = AF_INET;
@@ -39,7 +39,7 @@ namespace net {
 		}
 	}
 
-	endpoint::endpoint(const address& addr,
+	endpoint::endpoint(const ip::address& addr,
 		unsigned short port_num) noexcept
 		: data_()
 	{
@@ -59,8 +59,8 @@ namespace net {
 			data_.v6.sin6_port =
 				socket_ops::host_to_network_short(port_num);
 			data_.v6.sin6_flowinfo = 0;
-			address_v6 v6_addr = addr.to_v6();
-			address_v6::bytes_type bytes = v6_addr.to_bytes();
+			ip::address_v6 v6_addr = addr.to_v6();
+			ip::address_v6::bytes_type bytes = v6_addr.to_bytes();
 			memcpy(data_.v6.sin6_addr.s6_addr, bytes.data(), 16);
 			data_.v6.sin6_scope_id =
 				static_cast<u_long>(
@@ -96,24 +96,24 @@ namespace net {
 		}
 	}
 
-	address endpoint::address() const noexcept
+	ip::address endpoint::address() const noexcept
 	{
 		using namespace std; // For memcpy.
 		if (is_v4())
 		{
-			return asio::ip::address_v4(
+			return ip::address_v4(
 				socket_ops::network_to_host_long(
 					data_.v4.sin_addr.s_addr));
 		}
 		else
 		{
-			asio::ip::address_v6::bytes_type bytes;
+			ip::address_v6::bytes_type bytes;
 			memcpy(bytes.data(), data_.v6.sin6_addr.s6_addr, 16);
-			return asio::ip::address_v6(bytes, data_.v6.sin6_scope_id);
+			return ip::address_v6(bytes, data_.v6.sin6_scope_id);
 		}
 	}
 
-	void endpoint::address(const asio::ip::address& addr) noexcept
+	void endpoint::address(const ip::address& addr) noexcept
 	{
 		endpoint tmp_endpoint(addr, port());
 		data_ = tmp_endpoint.data_;
@@ -138,9 +138,9 @@ namespace net {
 		std::ostringstream tmp_os;
 		tmp_os.imbue(std::locale::classic());
 		if (is_v4())
-			tmp_os << address();
+			tmp_os << address().to_string();
 		else
-			tmp_os << '[' << address() << ']';
+			tmp_os << '[' << address().to_string() << ']';
 		tmp_os << ':' << port();
 
 		return tmp_os.str();

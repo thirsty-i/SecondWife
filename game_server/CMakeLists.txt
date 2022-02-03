@@ -13,6 +13,6 @@ include_directories(
 # 将源代码添加到此项目的可执行文件。
 add_executable (game_server "game_server.cpp")
 
-target_link_libraries(game_server "net" "common")
 
+target_link_libraries(game_server common net)
 # TODO: 如有需要，请添加测试并安装目标。

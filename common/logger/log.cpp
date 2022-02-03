@@ -1,6 +1,5 @@
 #include "log.h"
 
-
 void g_init_log(std::string&& strAppName)
 {
 	std::string config_path = "../../../../configs/" + strAppName + ".conf";

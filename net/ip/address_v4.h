@@ -6,6 +6,7 @@
 #include "socket_types.h"
 
 namespace net {
+namespace ip {
 class address_v4
 {
 public:
@@ -126,18 +127,18 @@ private:
     in4_addr_type addr_;
 };
 
-inline address_v4 make_address_v4(const address_v4::bytes_type& bytes)
+inline address_v4 make_address_v4(const address_v4::bytes_type& bytes) noexcept
 {
     return address_v4(bytes);
 }
 
-inline address_v4 make_address_v4(address_v4::uint_type addr)
+inline address_v4 make_address_v4(address_v4::uint_type addr) noexcept
 {
     return address_v4(addr);
 }
 
-address_v4 make_address_v4(const char* str);
+address_v4 make_address_v4(const char* str) noexcept;
 
-address_v4 make_address_v4(const std::string& str);
-
+address_v4 make_address_v4(const std::string& str) noexcept;
+} // namespace ip
 } // namespace net

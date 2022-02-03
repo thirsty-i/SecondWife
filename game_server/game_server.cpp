@@ -1,6 +1,9 @@
-﻿#include "game_server.h"
+﻿#include "platform.h"
+
+#include "game_server.h"
+#include "ip/address.h"
+
 #include "logger/log.h"
-#include "platform.h"
 
 game_server::game_server()
 	: service_()
@@ -22,5 +25,10 @@ INITIALIZE_EASYLOGGINGPP
 int main()
 {
 	g_init_log(game_server::instance().server_name());
+
+	using net::ip::address;
+	address ress = address::from_string("127.0.0.1");
+
+	LOG(DEBUG) << ress.to_string();
 	return 0;
 }

@@ -1,7 +1,7 @@
-# pragma once
 
 #include "address.h"
 namespace net {
+namespace ip {
 address::address() noexcept
 	: type_(ipv4),
 	ipv4_address_(),
@@ -74,24 +74,14 @@ address& address::operator=(
 }
 
 
-address make_address(const char* str) noexcept
+address address::from_string(const char* str)
 {
-	address_v6 ipv6_address =
-		make_address_v6(str);
-	if (!ipv6_address.is_unspecified())
-		return address(ipv6_address);
-
-	address_v4 ipv4_address =
-		make_address_v4(str);
-	if (!ec)
-		return address(ipv4_address);
-
-	return address();
+	return ip::make_address(str);
 }
 
-address make_address(const std::string& str)
+address address::from_string(const std::string& str)
 {
-	return make_address(str.c_str());
+	return ip::make_address(str);
 }
 
 address_v4 address::to_v4() const
@@ -151,5 +141,28 @@ bool operator<(const address& a1, const address& a2) noexcept
 		return a1.ipv6_address_ < a2.ipv6_address_;
 	return a1.ipv4_address_ < a2.ipv4_address_;
 }
+
+
+address make_address(const char* str) noexcept
+{
+	address_v6 ipv6_address =
+		make_address_v6(str);
+	if (!ipv6_address.is_unspecified())
+		return address(ipv6_address);
+
+	address_v4 ipv4_address =
+		make_address_v4(str);
+	if (!ipv4_address.is_unspecified())
+		return address(ipv4_address);
+
+	return address();
+}
+
+address make_address(const std::string& str) noexcept
+{
+	return make_address(str.c_str());
+}
+
+} // namespace ip
 } // namespace net
 

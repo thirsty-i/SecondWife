@@ -28,7 +28,7 @@ include_directories(
    ${CMAKE_CURRENT_SOURCE_DIR}/net
 )
 
-add_definitions(-DXLOCALE_NOT_USED)
-add_subdirectory("net")
+
 add_subdirectory("common")
+add_subdirectory("net")
 

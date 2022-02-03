@@ -9,8 +9,15 @@ namespace net {
 epoll::epoll()
 	: descriptor_pool_(1024)
 	, epoll_fd_(_epoll_create())
+	, worker_thread_(&_worker_func, this)
 {
-	LOG(DEBUG) << "hello";
+	
+}
+
+epoll::~epoll()
+{
+	thread_stop_ = false;
+	worker_thread_.join();
 }
 
 int epoll::_epoll_create()
@@ -26,7 +33,21 @@ int epoll::_epoll_create()
 
 bool epoll::register_descriptor(int descriptor)
 {
+
+
 	return true;
+}
+
+void epoll::_worker_func()
+{
+	int number = 0;
+	epoll_event events[128];
+
+	while (!thread_stop_)
+	{
+		number = epoll_wait(epoll_fd_, events, 128, -1);
+
+	}
 }
 
 };

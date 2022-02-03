@@ -3,13 +3,21 @@
 #include "platform.h"
 
 #if (PLATFORM == WINDOWS)
+# if defined(_WINSOCKAPI_) && !defined(_WINSOCK2API_)
+#  error WinSock.h has already been included
+# endif // defined(_WINSOCKAPI_) && !defined(_WINSOCK2API_)
+
 # include <winsock2.h>
 # include <ws2tcpip.h>
+# pragma comment(lib, "ws2_32.lib")
+
 #elif (PLATFORM == LINUX) // Linux
 # include <sys/socket.h> 
 # include <sys/types.h>
 # include<netinet/in.h>
 #endif
+
+#include <cstdint>
 
 namespace net {
 #if (PLATFORM == WINDOWS)
@@ -33,4 +41,5 @@ namespace net {
 		typedef sockaddr_in sockaddr_in4_type;
 		typedef sockaddr_in6 sockaddr_in6_type;
 		typedef sockaddr socket_addr_type;
+		typedef u_short u_short_type;
 } // namespace net

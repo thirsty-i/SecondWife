@@ -1,10 +1,11 @@
 #pragma once
 
 #include "socket_types.h"
-#include "address.h"
+#include "ip/address.h"
 #include <string>
 
 namespace net {
+
 class endpoint
 {
 public:
@@ -13,7 +14,7 @@ public:
 	endpoint(int family,
 		unsigned short port_num) noexcept;
 
-	endpoint(const address& addr,
+	endpoint(const ip::address& addr,
 		unsigned short port_num) noexcept;
 
 	endpoint(const endpoint& other) noexcept
@@ -54,10 +55,10 @@ public:
 
 	void port(unsigned short port_num) noexcept;
 
-	address address() const noexcept;
+	ip::address address() const noexcept;
 
 	void address(
-		const address& addr) noexcept;
+		const ip::address& addr) noexcept;
 
 	friend bool operator==(const endpoint& e1,
 		const endpoint& e2) noexcept;
@@ -69,6 +70,8 @@ public:
 	{
 		return data_.base.sa_family == AF_INET;
 	}
+
+	u_short_type family() { return data_.base.sa_family; }
 
 	std::string to_string() const;
 

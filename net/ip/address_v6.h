@@ -5,6 +5,7 @@
 #include <string>
 
 namespace net {
+namespace ip {
 
 class address_v6
 {
@@ -134,4 +135,5 @@ address_v4 make_address_v4(
 address_v6 make_address_v6(
     v4_mapped_t, const address_v4& v4_addr);
 
+} // namespace ip
 } // namespace net

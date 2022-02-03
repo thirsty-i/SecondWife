@@ -4,6 +4,7 @@
 #include "logger/log.h"
 
 namespace net {
+namespace ip {
 address_v4::address_v4(const address_v4::bytes_type& bytes)
 {
 #if UCHAR_MAX > 0xFF
@@ -77,40 +78,9 @@ bool address_v4::is_unspecified() const noexcept
 	return to_uint() == 0;
 }
 
-bool address_v4::is_class_a() const
-{
-	return (to_uint() & 0x80000000) == 0;
-}
-
-bool address_v4::is_class_b() const
-{
-	return (to_uint() & 0xC0000000) == 0x80000000;
-}
-
-bool address_v4::is_class_c() const
-{
-	return (to_uint() & 0xE0000000) == 0xC0000000;
-}
-
 bool address_v4::is_multicast() const noexcept
 {
 	return (to_uint() & 0xF0000000) == 0xE0000000;
-}
-
-address_v4 address_v4::broadcast(const address_v4& addr, const address_v4& mask)
-{
-	return address_v4(addr.to_uint() | (mask.to_uint() ^ 0xFFFFFFFF));
-}
-
-address_v4 address_v4::netmask(const address_v4& addr)
-{
-	if (addr.is_class_a())
-		return address_v4(0xFF000000);
-	if (addr.is_class_b())
-		return address_v4(0xFFFF0000);
-	if (addr.is_class_c())
-		return address_v4(0xFFFFFF00);
-	return address_v4(0xFFFFFFFF);
 }
 
 address_v4 make_address_v4(const char* str) noexcept
@@ -126,6 +96,7 @@ address_v4 make_address_v4(const std::string& str) noexcept
 {
 	return make_address_v4(str.c_str());
 }
+} // namespace ip
 } // namespace net
 
 
