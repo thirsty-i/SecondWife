@@ -6,7 +6,7 @@
 
 namespace net {
 namespace socket_ops{
-	socket_type open(int af, int type, int protocol);
+	socket_type socket(int af, int type, int protocol);
 
 	inline socket_type accept(socket_type s, socket_addr_type* addr, socklen_t* addrlen);
 

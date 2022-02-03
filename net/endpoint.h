@@ -71,7 +71,7 @@ public:
 		return data_.base.sa_family == AF_INET;
 	}
 
-	u_short_type family() { return data_.base.sa_family; }
+	socket_family_t family() { return data_.base.sa_family; }
 
 	std::string to_string() const;
 

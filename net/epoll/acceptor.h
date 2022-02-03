@@ -6,17 +6,17 @@
 
 namespace net {
 template <class Service>
-class accept
+class acceptor
 {
 public:
-	accept(Service* service, const endpoint& endpoint)
+	acceptor(Service* service, const endpoint& endpoint)
 		: service_(service) 
 		, socket_(invalid_socket)
 	{
 		int result = 0;
 		LOG_PROCESS_ERROR(service_);
 		// TODO£º Scalable
-		socket_ = socket_ops::open(endpoint.family(), SOCK_STREAM, IPPROTO_TCP);
+		socket_ = socket_ops::socket(endpoint.family(), SOCK_STREAM, IPPROTO_TCP);
 		LOG_PROCESS_ERROR(socket_ != invalid_socket);
 
 		result = socket_ops::set_non_block(socket_, 1);
@@ -30,7 +30,6 @@ public:
 	}
 
 private:
-
 	socket_type socket_;
 	Service* service_;
 };

@@ -28,6 +28,7 @@ namespace net {
 		const int max_addr_v6_str_len = 256;
 		typedef int socklen_t;
 		typedef u_long ioctl_arg_type;
+		typedef ADDRESS_FAMILY socket_family_t;
 #elif (PLATFORM == LINUX) // Linux
 		typedef int socket_type;
 		const int invalid_socket = -1;
@@ -35,6 +36,7 @@ namespace net {
 		const int max_addr_v4_str_len = INET_ADDRSTRLEN;
 		const int max_addr_v6_str_len = 256;
 		typedef int ioctl_arg_type;
+		typedef sa_family_t socket_family_t;
 #endif
 		typedef in_addr in4_addr_type;
 		typedef in6_addr in6_addr_type;
@@ -42,4 +44,5 @@ namespace net {
 		typedef sockaddr_in6 sockaddr_in6_type;
 		typedef sockaddr socket_addr_type;
 		typedef u_short u_short_type;
+		
 } // namespace net
