@@ -11,7 +11,6 @@ class epoll
 public:
 	epoll();
 	bool register_descriptor(int descriptor);
-	void set_non_block(int descriptor);
 
 private:
 	int _epoll_create();

@@ -2,7 +2,6 @@
 #if PLATFORM == LINUX
 #include "epoll.h"
 #include <sys/epoll.h>
-#include <fcntl.h>
 
 #include "socket_ops.h"
 
@@ -28,14 +27,6 @@ int epoll::_epoll_create()
 bool epoll::register_descriptor(int descriptor)
 {
 	return true;
-}
-
-void epoll::set_non_block(int descriptor)
-{
-	int flags = fcntl(descriptor, F_GETFL);
-	flags = flags | O_NONBLOCK;
-	fcntl(descriptor, F_SETFL, flags);
-	return;
 }
 
 };
