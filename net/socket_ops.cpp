@@ -13,31 +13,31 @@ namespace socket_ops {
 		return ::socket(af, type, protocol);
 	}
 
-	inline socket_type accept(socket_type s, socket_addr_type* addr, socklen_t* addrlen)
+	socket_type accept(socket_type s, socket_addr_type* addr, socklen_t* addrlen)
 	{
 		LOG_PROCESS_ERROR_RET(s != invalid_socket, socket_error_retval);
 		return ::accept(s, addr, addrlen);
 	}
 
-	inline int bind(socket_type s, const socket_addr_type* addr, socklen_t addrlen)
+	int bind(socket_type s, const socket_addr_type* addr, socklen_t addrlen)
 	{
 		LOG_PROCESS_ERROR_RET(s != invalid_socket, socket_error_retval);
 		return ::bind(s, addr, addrlen);
 	}
 
-	inline int listen(socket_type s, int backlog)
+	int listen(socket_type s, int backlog)
 	{
 		LOG_PROCESS_ERROR_RET(s != invalid_socket, socket_error_retval);
 		return ::listen(s, backlog);
 	}
 
-	inline int connect(socket_type s, const socket_addr_type* addr, socklen_t addrlen)
+	int connect(socket_type s, const socket_addr_type* addr, socklen_t addrlen)
 	{
 		LOG_PROCESS_ERROR_RET(s != invalid_socket, socket_error_retval);
 		return ::connect(s, addr, addrlen);
 	}
 
-	bool set_non_block(socket_type s, bool value)
+	int set_non_block(socket_type s, bool value)
 	{
 #if (PLATFORM == WINDOWS)
 		ioctl_arg_type arg = (value ? 1 : 0);
@@ -46,7 +46,7 @@ namespace socket_ops {
 		ioctl_arg_type arg = (value ? 1 : 0);
 		int result = ::ioctl(s, FIONBIO, &arg);
 #endif
-		return true;
+		return result;
 	}
 
 	u_long network_to_host_long(u_long value)
@@ -83,6 +83,52 @@ namespace socket_ops {
 	int gethostname(char* name, int namelen)
 	{
 		return ::gethostname(name, namelen);
+	}
+
+	signed_size_type send(socket_type s, buf* bufs, size_t count, int flags)
+	{
+#if (PLATFORM == WINDOWS)
+		// Send the data.
+		DWORD send_buf_count = static_cast<DWORD>(count);
+		DWORD bytes_transferred = 0;
+		DWORD send_flags = flags;
+		int result = ::WSASend(s, bufs,
+			send_buf_count, &bytes_transferred, send_flags, 0, 0);
+
+		if (result != 0)
+			return socket_error_retval;
+		return bytes_transferred;
+#elif (PLATFORM == LINUX) // Linux
+		msghdr msg = msghdr();
+		msg.msg_iov = const_cast<buf*>(bufs);
+		msg.msg_iovlen = static_cast<int>(count);
+		signed_size_type result = ::sendmsg(s, &msg, flags);
+		return result;
+#endif
+	}
+
+	signed_size_type recv(socket_type s, buf* bufs, size_t count, int flags)
+	{
+#if (PLATFORM == WINDOWS)
+		// Receive some data.
+		DWORD recv_buf_count = static_cast<DWORD>(count);
+		DWORD bytes_transferred = 0;
+		DWORD recv_flags = flags;
+		int result = ::WSARecv(s, bufs, recv_buf_count,
+			&bytes_transferred, &recv_flags, 0, 0);
+
+		if (errno == WSAEMSGSIZE || errno == ERROR_MORE_DATA)
+			result = 0;
+		if (result != 0)
+			return socket_error_retval;
+		return bytes_transferred;
+#elif (PLATFORM == LINUX) // Linux
+		msghdr msg = msghdr();
+		msg.msg_iov = bufs;
+		msg.msg_iovlen = static_cast<int>(count);
+		signed_size_type result = ::recvmsg(s, &msg, flags);
+		return result;
+#endif
 	}
 
 } // namespace net

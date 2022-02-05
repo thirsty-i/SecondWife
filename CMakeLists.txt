@@ -13,21 +13,14 @@ add_subdirectory ("game_server")
 
 set(CXX_FLAGS
  -std=c++11
- -pthread
 )
-
-message("hello")
-message(${CMAKE_CURRENT_SOURCE_DIR})
-message(${CMAKE_SOURCE_DIR})
-message("hello")
 
 # includes
 include_directories(
-   ${CMAKE_CURRENT_SOURCE_DIR}/mtl
-   ${CMAKE_CURRENT_SOURCE_DIR}/common
-   ${CMAKE_CURRENT_SOURCE_DIR}/net
+   ${CMAKE_SOURCE_DIR}/mtl
+   ${CMAKE_SOURCE_DIR}/common
+   ${CMAKE_SOURCE_DIR}/net
 )
-
 
 add_subdirectory("common")
 add_subdirectory("net")

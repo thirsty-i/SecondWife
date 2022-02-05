@@ -8,15 +8,15 @@ namespace net {
 namespace socket_ops{
 	socket_type open(int af, int type, int protocol);
 
-	inline socket_type accept(socket_type s, socket_addr_type* addr, socklen_t* addrlen);
+	socket_type accept(socket_type s, socket_addr_type* addr, socklen_t* addrlen);
 
-	inline int bind(socket_type s, const socket_addr_type* addr, socklen_t addrlen);
+	int bind(socket_type s, const socket_addr_type* addr, socklen_t addrlen);
 
-	inline int listen(socket_type s, int backlog);
+	int listen(socket_type s, int backlog);
 
-	inline int connect(socket_type s, const socket_addr_type* addr, socklen_t addrlen);
+	int connect(socket_type s, const socket_addr_type* addr, socklen_t addrlen);
 
-	bool set_non_block(socket_type s, bool value);
+	int set_non_block(socket_type s, bool value);
 
 	u_long network_to_host_long(u_long value);
 
@@ -32,6 +32,9 @@ namespace socket_ops{
 	int inet_pton(int af, const char* src, void* dest, unsigned long* scope_id);
 
 	int gethostname(char* name, int namelen);
+
+	signed_size_type send(socket_type s, buf* bufs, size_t count, int flags);
+	signed_size_type recv(socket_type s, buf* bufs, size_t count, int flags);
 
 };
 };

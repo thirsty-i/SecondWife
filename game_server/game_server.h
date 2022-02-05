@@ -2,6 +2,7 @@
 
 #include "design_pattern/singleton.h"
 #include "net.h"
+#include "epoll/acceptor.h"
 
 class game_server 
 	: public mtl::singleton<game_server>
@@ -18,4 +19,6 @@ private:
 private:
 	service service_;
 	friend class mtl::singleton<game_server>;
+
+	net::acceptor acceptor_;
 };

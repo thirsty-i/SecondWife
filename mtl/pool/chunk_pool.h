@@ -10,13 +10,7 @@ class chunk_pool
 public:
 	using chunk_t = mtl::chunk;
 
-	chunk_pool(size_t block_size, size_t blocks)
-		: chunk_pool(block_size, blocks, MAX_RATE) {};
-
-	chunk_pool(size_t block_size, size_t blocks, size_t recycle_rate)
-		: chunk_pool(block_size, blocks, recycle_rate, get_new_delete_resource()) {};
-
-	chunk_pool(size_t block_size, size_t blocks, size_t recycle_rate, memory_resource* resource)
+	chunk_pool(size_t block_size, size_t blocks, size_t recycle_rate = MAX_RATE, memory_resource* resource = get_new_delete_resource())
 		: block_size_(block_size)
 		, blocks_(blocks)
 		, recycle_rate_(recycle_rate)
@@ -113,7 +107,8 @@ private:
 				++free_cnt;
 		}
 
-		return (chunks_.size() - free_cnt) * recycle_rate_ / MAX_RATE;
+		size_t used_cnt = chunks_.size() - free_cnt;
+		return free_cnt > (used_cnt * recycle_rate_ / MAX_RATE);
 	}
 
 	void* _try_allocate()

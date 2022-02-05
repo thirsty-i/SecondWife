@@ -4,12 +4,15 @@
 #include <sys/epoll.h>
 
 #include "socket_ops.h"
+#include "logger/log.h"
 
 namespace net {
 epoll::epoll()
 	: descriptor_pool_(1024)
+	//, complete_events_(1024)
 	, epoll_fd_(_epoll_create())
-	, worker_thread_(&_worker_func, this)
+	, package_allocator_(1024, 1024)
+	, worker_thread_(&epoll::_worker_func, this)
 {
 	
 }
@@ -17,7 +20,9 @@ epoll::epoll()
 epoll::~epoll()
 {
 	thread_stop_ = false;
-	worker_thread_.join();
+
+	if(worker_thread_.joinable())
+		worker_thread_.join();
 }
 
 int epoll::_epoll_create()
@@ -31,22 +36,57 @@ int epoll::_epoll_create()
 	return fd;
 }
 
-bool epoll::register_descriptor(int descriptor)
+std::shared_ptr<descriptor_data> epoll::register_descriptor(int descriptor)
 {
+	std::shared_ptr<descriptor_data> data = descriptor_pool_.create();
 
+	epoll_event ev = { 0, { 0 } };
+	ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLET;
+	data->descriptor() = descriptor;
+	ev.data.ptr = &data;
 
-	return true;
+	int result = epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, descriptor, &ev);
+	LOG_PROCESS_ERROR_RET(result == 0, NULL);
+
+	return data;
 }
 
 void epoll::_worker_func()
 {
-	int number = 0;
-	epoll_event events[128];
-
+	LOG(ERROR) << "threadid:" << std::this_thread::get_id();
 	while (!thread_stop_)
 	{
-		number = epoll_wait(epoll_fd_, events, 128, -1);
+		_wait();
+	}
+}
 
+void epoll::_wait()
+{
+	int number = 0;
+	epoll_event epoll_events[128];
+	number = epoll_wait(epoll_fd_, epoll_events, 128, -1);
+
+	if (number < 0)
+		return;
+
+	LOG(ERROR) << "1111111";
+	for (int i = 0; i < number; ++i)
+	{
+		void* ptr = epoll_events[i].data.ptr;
+		uint32_t events = epoll_events[i].events;
+
+		descriptor_data* state = static_cast<descriptor_data*>(ptr);
+
+		if (events & (EPOLLERR))
+			state->set_except_op();
+
+		if (events & (EPOLLIN | EPOLLPRI | EPOLLRDHUP))
+			state->set_read_op();
+
+		if (events & EPOLLOUT)
+			state->set_write_op();
+
+		state->perform_io();
 	}
 }
 
