@@ -9,21 +9,25 @@
 #include "logger/log.h"
 
 
-net::endpoint endpoint(net::ip::address::from_string("127.0.0.1"), 8000);
 
 game_server::game_server()
 	: service_()
-	, acceptor_(&service_, endpoint)
 {
+	net::endpoint endpoint(net::ip::address::from_string("127.0.0.1"), 8001);
+	acceptor_ = new net::acceptor(&service_, endpoint);
+	
+	start();
 }
 
 bool game_server::start()
 {
+	_start_nets();
 	return true;
 }
 
 bool game_server::_start_nets()
 {
+	service_.start();
 	return true;
 }
 
@@ -32,5 +36,6 @@ int main()
 {
 	g_init_log(game_server::instance().server_name());
 
+	while (1);
 	return 0;
 }

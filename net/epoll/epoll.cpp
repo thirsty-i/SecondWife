@@ -12,7 +12,6 @@ epoll::epoll()
 	//, complete_events_(1024)
 	, epoll_fd_(_epoll_create())
 	, package_allocator_(1024, 1024)
-	, worker_thread_(&epoll::_worker_func, this)
 {
 	
 }
@@ -21,8 +20,13 @@ epoll::~epoll()
 {
 	thread_stop_ = false;
 
-	if(worker_thread_.joinable())
-		worker_thread_.join();
+	if(worker_thread_ && worker_thread_->joinable())
+		worker_thread_->join();
+}
+
+void epoll::start()
+{
+	worker_thread_ = new std::thread(&epoll::_worker_func, this);
 }
 
 int epoll::_epoll_create()
@@ -43,7 +47,7 @@ std::shared_ptr<descriptor_data> epoll::register_descriptor(int descriptor)
 	epoll_event ev = { 0, { 0 } };
 	ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLET;
 	data->descriptor() = descriptor;
-	ev.data.ptr = &data;
+	ev.data.ptr = data.get();
 
 	int result = epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, descriptor, &ev);
 	LOG_PROCESS_ERROR_RET(result == 0, NULL);

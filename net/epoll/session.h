@@ -32,7 +32,7 @@ class session
 	};
 
 public:
-	session(service* service);
+	session(service* service, socket_type s);
 private:
 	void _register_callbacks();
 	void _handle_read();
@@ -46,5 +46,6 @@ private:
 
 	ring_buffer send_buffer_;
 	ring_buffer recv_buffer_;
+	socket_type socket_;
 };
 }

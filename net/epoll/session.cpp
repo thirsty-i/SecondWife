@@ -47,13 +47,17 @@ size_t session::ring_buffer::get_used()
 	return in_ - out_; 
 }
 
-session::session(service* service)
+session::session(service* service, socket_type s)
 	: service_(service)
 	, send_buffer_(1024)
 	, recv_buffer_(1024)
 	
 {
 	LOG_PROCESS_ERROR(service_);
+
+	descriptor_data_ = service_->register_descriptor(s);
+	LOG_PROCESS_ERROR(descriptor_data_);
+
 	_register_callbacks();
 }
 

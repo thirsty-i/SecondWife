@@ -18,16 +18,16 @@ public:
 
 	void post_complete_event();
 	package_allocator& get_package_allocator() { return package_allocator_; }
+	void start();
 private:
 	int  _epoll_create();
 	void _worker_func();
 	void _wait();
-
 private:
 	enum { EPOLL_SIZE = 20000 };
 	int epoll_fd_;
 	bool thread_stop_;
-	std::thread worker_thread_;
+	std::thread* worker_thread_;
 	mtl::object_pool<descriptor_data> descriptor_pool_;
 	//mtl::circle_list<void*> complete_events_;
 	net::package_allocator package_allocator_;

@@ -39,7 +39,8 @@ public:
 private:
 	void _register_callbacks()
 	{
-		descriptor_data_->set_read_callback(std::bind(&acceptor::_handle_read, this));
+		//descriptor_data_->set_read_callback(std::bind(&acceptor::_handle_read, this));
+		descriptor_data_->set_read_callback([this]() {acceptor::_handle_read(); });
 	}
 
 	void _handle_read()
@@ -51,9 +52,7 @@ private:
 		if (remote < 0)
 			return;
 
-		session* remote_session = new session(service_);
-
-		service_->register_descriptor(remote);
+		session* remote_session = new session(service_, remote);
 
 		LOG(ERROR) << "hello, remote:" << remote
 			<< "you leak...";

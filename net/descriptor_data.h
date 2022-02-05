@@ -19,9 +19,9 @@ public:
 	void set_except_op() { ops |= except; }
 	void clear_ops() { ops = 0; }
 
-	void set_read_callback(functor_t f) { read_handler_ = f; }
-	void set_write_callback(functor_t f) { write_handler_ = f; }
-	void set_except_callback(functor_t f) { except_handler_ = f; }
+	void set_read_callback(functor_t f) { read_handler_ = std::move(f); }
+	void set_write_callback(functor_t f) { write_handler_ = std::move(f); }
+	void set_except_callback(functor_t f) { except_handler_ = std::move(f); }
 	int& descriptor() { return descriptor_; }
 
 	void perform_io()

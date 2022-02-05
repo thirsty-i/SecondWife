@@ -20,5 +20,5 @@ private:
 	service service_;
 	friend class mtl::singleton<game_server>;
 
-	net::acceptor acceptor_;
+	net::acceptor* acceptor_;
 };
