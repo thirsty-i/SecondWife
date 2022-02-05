@@ -30,6 +30,7 @@ namespace net {
 		typedef u_long ioctl_arg_type;
 		typedef int signed_size_type;
 		typedef WSABUF buf;
+		typedef ADDRESS_FAMILY socket_family_t;
 #elif (PLATFORM == LINUX) // Linux
 		typedef int socket_type;
 		const int invalid_socket = -1;
@@ -39,6 +40,7 @@ namespace net {
 		typedef int ioctl_arg_type;
 		typedef ssize_t signed_size_type;
 		typedef iovec buf;
+		typedef sa_family_t socket_family_t;
 #endif
 		typedef in_addr in4_addr_type;
 		typedef in6_addr in6_addr_type;

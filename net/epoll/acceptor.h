@@ -18,7 +18,7 @@ public:
 		int result = 0;
 		LOG_PROCESS_ERROR(service_);
 		// TODO£º Scalable
-		socket_ = socket_ops::open(endpoint.family(), SOCK_STREAM, IPPROTO_TCP);
+		socket_ = socket_ops::socket(endpoint.family(), SOCK_STREAM, IPPROTO_TCP);
 		LOG_PROCESS_ERROR(socket_ != invalid_socket);
 
 		result = socket_ops::set_non_block(socket_, 1);
