@@ -33,8 +33,8 @@ namespace socket_ops{
 
 	int gethostname(char* name, int namelen);
 
-	signed_size_type send(socket_type s, buf* bufs, size_t count, int flags);
-	signed_size_type recv(socket_type s, buf* bufs, size_t count, int flags);
+	signed_size_type send(socket_type s, const void* data, size_t size, int flags);
+	signed_size_type recv(socket_type s, void* data, size_t size, int flags);
 
 };
 };

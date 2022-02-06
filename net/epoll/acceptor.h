@@ -39,7 +39,6 @@ public:
 private:
 	void _register_callbacks()
 	{
-		//descriptor_data_->set_read_callback(std::bind(&acceptor::_handle_read, this));
 		descriptor_data_->set_read_callback([this]() {acceptor::_handle_read(); });
 	}
 
@@ -57,7 +56,6 @@ private:
 		LOG(ERROR) << "hello, remote:" << remote
 			<< "you leak...";
 	}
-
 private:
 	std::shared_ptr<descriptor_data> descriptor_data_;
 	socket_type socket_;

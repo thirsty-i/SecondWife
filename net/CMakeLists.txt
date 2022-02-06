@@ -9,3 +9,11 @@
 "iocp/iocp.cpp" 
  "package_allocator.hpp"
   "descriptor_data.h"  "epoll/session.cpp")
+
+# includes
+include_directories(
+   ${CMAKE_SOURCE_DIR}/mtl
+   ${CMAKE_SOURCE_DIR}/common
+   ${CMAKE_SOURCE_DIR}/net
+   ${CMAKE_SOURCE_DIR}/deps/jemalloc/include
+)

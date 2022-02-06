@@ -85,36 +85,38 @@ namespace socket_ops {
 		return ::gethostname(name, namelen);
 	}
 
-	signed_size_type send(socket_type s, buf* bufs, size_t count, int flags)
+	signed_size_type send(socket_type s, const void* data, size_t size, int flags)
 	{
 #if (PLATFORM == WINDOWS)
 		// Send the data.
-		DWORD send_buf_count = static_cast<DWORD>(count);
+		WSABUF buf;
+		buf.buf = const_cast<char*>(static_cast<const char*>(data));
+		buf.len = static_cast<ULONG>(size);
 		DWORD bytes_transferred = 0;
 		DWORD send_flags = flags;
-		int result = ::WSASend(s, bufs,
-			send_buf_count, &bytes_transferred, send_flags, 0, 0);
+		int result = ::WSASend(s, &buf, 1,
+			&bytes_transferred, send_flags, 0, 0);
 
 		if (result != 0)
 			return socket_error_retval;
 		return bytes_transferred;
-#elif (PLATFORM == LINUX) // Linux
-		msghdr msg = msghdr();
-		msg.msg_iov = const_cast<buf*>(bufs);
-		msg.msg_iovlen = static_cast<int>(count);
-		signed_size_type result = ::sendmsg(s, &msg, flags);
+#elif (PLATFORM == LINUX)
+		signed_size_type result = ::send(s,
+			static_cast<const char*>(data), size, flags);
 		return result;
 #endif
 	}
 
-	signed_size_type recv(socket_type s, buf* bufs, size_t count, int flags)
+	signed_size_type recv(socket_type s, void* data, size_t size, int flags)
 	{
 #if (PLATFORM == WINDOWS)
 		// Receive some data.
-		DWORD recv_buf_count = static_cast<DWORD>(count);
+		WSABUF buf;
+		buf.buf = const_cast<char*>(static_cast<const char*>(data));
+		buf.len = static_cast<ULONG>(size);
 		DWORD bytes_transferred = 0;
 		DWORD recv_flags = flags;
-		int result = ::WSARecv(s, bufs, recv_buf_count,
+		int result = ::WSARecv(s, &buf, 1,
 			&bytes_transferred, &recv_flags, 0, 0);
 
 		if (errno == WSAEMSGSIZE || errno == ERROR_MORE_DATA)
@@ -122,11 +124,8 @@ namespace socket_ops {
 		if (result != 0)
 			return socket_error_retval;
 		return bytes_transferred;
-#elif (PLATFORM == LINUX) // Linux
-		msghdr msg = msghdr();
-		msg.msg_iov = bufs;
-		msg.msg_iovlen = static_cast<int>(count);
-		signed_size_type result = ::recvmsg(s, &msg, flags);
+#elif (PLATFORM == LINUX)
+		signed_size_type result = ::recv(s, static_cast<char*>(data), size, flags);
 		return result;
 #endif
 	}

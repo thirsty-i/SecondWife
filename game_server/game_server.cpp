@@ -6,9 +6,8 @@
 #include "package_allocator.hpp"
 #include "epoll/acceptor.h"
 #include "ip/address.h"
+#include "function.h"
 #include "logger/log.h"
-
-
 
 game_server::game_server()
 	: service_()
@@ -31,11 +30,21 @@ bool game_server::_start_nets()
 	return true;
 }
 
+int test(int a)
+{
+	return a;
+}
+
 INITIALIZE_EASYLOGGINGPP
 int main()
 {
-	g_init_log(game_server::instance().server_name());
+	//g_init_log(game_server::instance().server_name());
+	//while (1);
 
-	while (1);
+	g_init_log("game_server");
+
+	void* p = malloc(10);
+
+	int* a = new int;
 	return 0;
 }

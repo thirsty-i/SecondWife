@@ -11,7 +11,7 @@ epoll::epoll()
 	: descriptor_pool_(1024)
 	//, complete_events_(1024)
 	, epoll_fd_(_epoll_create())
-	, package_allocator_(1024, 1024)
+//	, package_allocator_(1024, 1024)
 {
 	
 }

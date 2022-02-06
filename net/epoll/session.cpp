@@ -1,5 +1,6 @@
 #include "socket_ops.h"
 #include "session.h"
+#include "bitops.h"
 
 namespace net {
 
@@ -26,15 +27,17 @@ void session::ring_buffer::incream_read(size_t size)
 }
 
 session::ring_buffer::ring_buffer(size_t size)
+	: in_(0)
+	, out_(0)
 {
 	size_t bytes = round_up_pow_of_2(size);
-	buffer_ = static_cast<char*>(::operator new(bytes));
+	buffer_ = static_cast<char*>(malloc(bytes));
 	capacity_ = bytes;
 }
 
 session::ring_buffer::~ring_buffer()
 {
-	::operator delete(buffer_);
+	free(buffer_);
 }
 
 size_t session::ring_buffer::get_unused() 
@@ -51,6 +54,7 @@ session::session(service* service, socket_type s)
 	: service_(service)
 	, send_buffer_(1024)
 	, recv_buffer_(1024)
+	, socket_(invalid_socket)
 	
 {
 	LOG_PROCESS_ERROR(service_);
@@ -77,11 +81,7 @@ void session::_handle_read()
 	{
 		size_t recv_size = 0;
 
-		buf bufs;
-		bufs.iov_base = recv_buffer_.peek_write();
-		bufs.iov_len = free_size;
-
-		recv_size = socket_ops::recv(descriptor_data_->descriptor(), &bufs, free_size, 0);
+		recv_size = socket_ops::recv(descriptor_data_->descriptor(), recv_buffer_.peek_write(), free_size, 0);
 		if (recv_size < 0)
 			return;  // read error
 
@@ -96,11 +96,7 @@ void session::_handle_write()
 	{
 		size_t write_size = 0;
 
-		buf bufs;
-		bufs.iov_base = send_buffer_.peek_read();
-		bufs.iov_len = used_size;
-
-		write_size = socket_ops::send(descriptor_data_->descriptor(), &bufs, used_size, 0);
+		write_size = socket_ops::send(descriptor_data_->descriptor(), send_buffer_.peek_read(), used_size, 0);
 		if (write_size < 0)
 			return;  // write error
 

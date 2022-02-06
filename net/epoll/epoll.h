@@ -17,7 +17,6 @@ public:
 	std::shared_ptr<descriptor_data> register_descriptor(int descriptor);
 
 	void post_complete_event();
-	package_allocator& get_package_allocator() { return package_allocator_; }
 	void start();
 private:
 	int  _epoll_create();
@@ -30,7 +29,6 @@ private:
 	std::thread* worker_thread_;
 	mtl::object_pool<descriptor_data> descriptor_pool_;
 	//mtl::circle_list<void*> complete_events_;
-	net::package_allocator package_allocator_;
 };
 }; // namespace net
 #endif // PLATFORM == LINUX
