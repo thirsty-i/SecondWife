@@ -13,40 +13,39 @@ class acceptor
 public:
 	explicit acceptor(service* service, endpoint& endpoint)
 		: service_(service) 
-		, socket_(invalid_socket)
 	{
 		int result = 0;
 		LOG_PROCESS_ERROR(service_);
 		// TODO£º Scalable
-		socket_ = socket_ops::socket(endpoint.family(), SOCK_STREAM, IPPROTO_TCP);
-		LOG_PROCESS_ERROR(socket_ != invalid_socket);
+		socket_type socket = socket_ops::socket(endpoint.family(), SOCK_STREAM, IPPROTO_TCP);
+		LOG_PROCESS_ERROR(socket != invalid_socket);
 
-		result = socket_ops::set_non_block(socket_, 1);
+		result = socket_ops::set_non_block(socket, 1);
 		LOG_PROCESS_ERROR(result == 0);
 
-		result = socket_ops::bind(socket_, endpoint.data(), endpoint.size());
+		result = socket_ops::bind(socket, endpoint.data(), endpoint.size());
 		LOG_PROCESS_ERROR(result == 0);
 
-		result = socket_ops::listen(socket_, SOMAXCONN);
+		result = socket_ops::listen(socket, SOMAXCONN);
 		LOG_PROCESS_ERROR(result == 0);
 
-		descriptor_data_ = service_->register_descriptor(socket_);
-		LOG_PROCESS_ERROR(descriptor_data_);
+		descriptor_data_.descriptor() = socket;
+		result = service_->register_descriptor(descriptor_data_);
+		LOG_PROCESS_ERROR(result);
 
 		_register_callbacks();
 	}
-
 private:
 	void _register_callbacks()
 	{
-		descriptor_data_->set_read_callback([this]() {acceptor::_handle_read(); });
+		descriptor_data_.set_read_callback([this]() { acceptor::_handle_read(); });
 	}
 
 	void _handle_read()
 	{
 		// ÔÝÊ±²»¼ÇÂ¼remote address
 		socket_type remote = invalid_socket;
-		remote = socket_ops::accept(socket_, 0, 0);
+		remote = socket_ops::accept(descriptor_data_.descriptor(), 0, 0);
 
 		if (remote < 0)
 			return;
@@ -57,8 +56,7 @@ private:
 			<< "you leak...";
 	}
 private:
-	std::shared_ptr<descriptor_data> descriptor_data_;
-	socket_type socket_;
+	descriptor_data descriptor_data_;
 	service* service_;
 };
 }

@@ -8,7 +8,7 @@
 "epoll/epoll.cpp"
 "iocp/iocp.cpp" 
  "package_allocator.hpp"
-  "descriptor_data.h"  "epoll/session.cpp")
+  "descriptor_data.h"  "epoll/session.cpp"  "events/event_base.h" "msg_header.h")
 
 # includes
 include_directories(

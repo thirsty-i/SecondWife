@@ -8,10 +8,9 @@
 
 namespace net {
 epoll::epoll()
-	: descriptor_pool_(1024)
+	: epoll_fd_(_epoll_create())
+
 	//, complete_events_(1024)
-	, epoll_fd_(_epoll_create())
-//	, package_allocator_(1024, 1024)
 {
 	
 }
@@ -22,6 +21,8 @@ epoll::~epoll()
 
 	if(worker_thread_ && worker_thread_->joinable())
 		worker_thread_->join();
+
+	delete worker_thread_;
 }
 
 void epoll::start()
@@ -40,19 +41,29 @@ int epoll::_epoll_create()
 	return fd;
 }
 
-std::shared_ptr<descriptor_data> epoll::register_descriptor(int descriptor)
+bool epoll::register_descriptor(descriptor_data& data)
 {
-	std::shared_ptr<descriptor_data> data = descriptor_pool_.create();
+	LOG_PROCESS_ERROR_RET(data.descriptor() >= 0, false);
 
 	epoll_event ev = { 0, { 0 } };
 	ev.events = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLPRI | EPOLLET;
-	data->descriptor() = descriptor;
-	ev.data.ptr = data.get();
+	ev.data.ptr = &data;
 
-	int result = epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, descriptor, &ev);
-	LOG_PROCESS_ERROR_RET(result == 0, NULL);
+	int result = epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, data.descriptor(), &ev);
+	LOG_PROCESS_ERROR_RET(result == 0, false);
 
-	return data;
+	return true;
+}
+
+bool epoll::unregister_descriptor(descriptor_data& data)
+{
+	LOG_PROCESS_ERROR_RET(data.descriptor() >= 0, false);
+
+	epoll_event ev = { 0, { 0 } };
+	int result = epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, data.descriptor(), &ev);
+	LOG_PROCESS_ERROR_RET(result == 0, false);
+
+	return true;
 }
 
 void epoll::_worker_func()

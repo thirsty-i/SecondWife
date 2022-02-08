@@ -2,11 +2,9 @@
 #include "platform.h"
 #if PLATFORM == LINUX
 
-#include "pool/object_pool.h"
 #include "descriptor_data.h"
 #include <thread>
-//#include "struct/circle_list.h"
-#include "package_allocator.hpp"
+#include "struct/lock_free/queue.h"
 
 namespace net {
 class epoll
@@ -14,7 +12,8 @@ class epoll
 public:
 	epoll();
 	~epoll();
-	std::shared_ptr<descriptor_data> register_descriptor(int descriptor);
+	bool register_descriptor(descriptor_data& data);
+	bool unregister_descriptor(descriptor_data& data);
 
 	void post_complete_event();
 	void start();
@@ -27,8 +26,7 @@ private:
 	int epoll_fd_;
 	bool thread_stop_;
 	std::thread* worker_thread_;
-	mtl::object_pool<descriptor_data> descriptor_pool_;
-	//mtl::circle_list<void*> complete_events_;
+	mtl::queue<>
 };
 }; // namespace net
 #endif // PLATFORM == LINUX

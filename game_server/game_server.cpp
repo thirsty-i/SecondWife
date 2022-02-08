@@ -1,13 +1,16 @@
 ﻿#include "platform.h"
 
 #include "game_server.h"
+//#include <memory>
+//#include "epoll/acceptor.h"
 #include "ip/address.h"
-#include <memory>
-#include "package_allocator.hpp"
-#include "epoll/acceptor.h"
-#include "ip/address.h"
-#include "function.h"
+//#include <thread>
 #include "logger/log.h"
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 game_server::game_server()
 	: service_()
@@ -35,16 +38,46 @@ int test(int a)
 	return a;
 }
 
+struct A
+{
+	int a;
+	int b;
+	int c;
+
+	A()
+	{
+	}
+
+	virtual void func()
+	{
+		LOG(ERROR) << "A::func, a:" << a;
+	}
+};
+
+
 INITIALIZE_EASYLOGGINGPP
 int main()
 {
 	//g_init_log(game_server::instance().server_name());
 	//while (1);
 
-	g_init_log("game_server");
+	
+	key_t key;
+	key = ftok("......", 1);
 
-	void* p = malloc(10);
+	int shmid = shmget(key, sizeof(A), IPC_CREAT | 0666);
+	LOG_PROCESS_ERROR_RET(shmid != -1, 0);
 
-	int* a = new int;
+	void* shmaddr = shmat(shmid, 0, 0);
+	//::new (shmaddr) B(10);
+
+	A* pA = static_cast<A*>(shmaddr);
+	pA->a = 10;
+
+	// 假设这里是重启后的代码
+	::new (shmaddr) A();
+	A* pA_1 = static_cast<A*>(shmaddr);
+	pA_1->func();
+
 	return 0;
 }

@@ -2,50 +2,39 @@
 
 #include "descriptor_data.h"
 #include "net.h"
+#include "struct/circle_list.h"
+#include "msg_header.h"
 
 namespace net {
-	
+
 class session
 {
-	class ring_buffer
-	{
-	public:
-		char* peek_read();
-
-		char* peek_write();
-
-		void incream_write(size_t size);
-
-		void incream_read(size_t size);
-
-		ring_buffer(size_t size);
-
-		~ring_buffer();
-		size_t get_unused();
-		size_t get_used();
-
-	private:
-		size_t in_;
-		size_t out_;
-		size_t capacity_;
-		char* buffer_;
-	};
-
 public:
 	session(service* service, socket_type s);
+	void recv();
+	void send(msg_header_t* msg, size_t size);
+
+	using functor_t = std::function<void(session*, char*, size_t)>;
+	void set_recv_callback(functor_t f) { recv_handler_ = std::move(f); }
 private:
+
+	void _remote_close();
 	void _register_callbacks();
 	void _handle_read();
 	void _handle_write();
 	void _handle_except();
-
 private:
-
 	service* service_;
-	std::shared_ptr<descriptor_data> descriptor_data_;
+	descriptor_data descriptor_data_;
 
-	ring_buffer send_buffer_;
-	ring_buffer recv_buffer_;
-	socket_type socket_;
+	mtl::circle_list<msg_header_t*> recv_list_;
+	mtl::circle_list<msg_header_t*> send_list_;
+
+	msg_header_t* send_msg_;
+	size_t recv_off_;
+	size_t send_off_;
+
+	mtl::ring_buffer recv_buffer_;
+	functor_t recv_handler_;
 };
 }

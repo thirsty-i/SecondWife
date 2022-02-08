@@ -1,7 +1,5 @@
 #pragma once
 
-#include "operation/operation.h"
-#include "socket_types.h"
 #include "logger/log.h"
 
 namespace net {
@@ -10,6 +8,7 @@ class descriptor_data
 	typedef std::function<void(void)> functor_t;
 public:
 	descriptor_data()
+		: descriptor_(-1)
 	{
 		clear_ops();
 	}

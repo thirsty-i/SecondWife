@@ -1,5 +1,4 @@
 #pragma once
-
 #include "struct/ring_buffer.h"
 
 namespace mtl
@@ -9,9 +8,11 @@ namespace mtl
 	{
 	public:
 		// If size is not a power of 2, it will expand
-		explicit circle_list(const size_t size, memory_resource* resource = get_new_delete_resource())
+		circle_list(const size_t size)
 			: ring_buffer_(size, sizeof(T))
-		{};
+		{}
+
+		~circle_list() {}
 
 		bool push(const T& data)
 		{
@@ -28,6 +29,14 @@ namespace mtl
 
 			ring_buffer_.read(data, 1);
 			return true;
+		}
+
+		T front()
+		{
+			if (empty())
+				return T();
+
+			return ring_buffer_.peek_read();
 		}
 
 		bool empty() { return !ring_buffer_.get_used(); }
