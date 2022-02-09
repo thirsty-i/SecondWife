@@ -6,11 +6,13 @@ cmake_minimum_required (VERSION 3.8)
 # 将源代码添加到此项目的可执行文件。
 add_executable (game_server "game_server.cpp")
 
+add_definitions(-DASIO_STANDALONE)
+
 set(INCLUDE_PATHS
    ${CMAKE_SOURCE_DIR}/mtl
    ${CMAKE_SOURCE_DIR}/common
    ${CMAKE_SOURCE_DIR}/net
-   ${CMAKE_SOURCE_DIR}/deps/gperftools/
+   ${CMAKE_SOURCE_DIR}/deps/
 )
 
 set(LIBRARIES  
