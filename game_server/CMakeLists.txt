@@ -4,16 +4,7 @@
 cmake_minimum_required (VERSION 3.8)
 
 # 将源代码添加到此项目的可执行文件。
-add_executable (game_server "game_server.cpp")
-
-add_definitions(-DASIO_STANDALONE)
-
-set(INCLUDE_PATHS
-   ${CMAKE_SOURCE_DIR}/mtl
-   ${CMAKE_SOURCE_DIR}/common
-   ${CMAKE_SOURCE_DIR}/net
-   ${CMAKE_SOURCE_DIR}/deps/
-)
+add_executable (game_server "game_server.cpp" "main.cpp")
 
 set(LIBRARIES  
     common
@@ -24,27 +15,16 @@ set(LIBS_PATH
     ${CMAKE_SOURCE_DIR}/libs/
 )
 
-#link_directories(${LIBS_PATH})
+message(111${PROJECT_SOURCE_DIR})
 
-IF (CMAKE_SYSTEM_NAME MATCHES "Linux")
-    list(APPEND LIBRARIES -pthread)
-ENDIF()
+target_compile_options(game_server PUBLIC -DASIO_STANDALONE)
 
-IF (CMAKE_SYSTEM_NAME MATCHES "Windows")
-    set_target_properties(game_server PROPERTIES LINK_FLAGS /INCLUDE:__tcmalloc)
-
-    #[[add_library(libtcmalloc_minimal SHARED IMPORTED )
-    set_target_properties(libtcmalloc_minimal PROPERTIES IMPORTED_LOCATION "${LIBS_PATH}/libtcmalloc_minimal.dll")
-    list(APPEND LIBRARIES libtcmalloc_minimal)]]
-ENDIF()
-
+list(APPEND LIBRARIES -pthread)
 list(APPEND LIBRARIES ${LIBS_PATH}libtcmalloc_minimal${CMAKE_STATIC_LIBRARY_SUFFIX})
 
-message(1111${LIBRARIES})
-
-target_include_directories(game_server PUBLIC 
-                           "${INCLUDE_PATHS}" 
-                           ) 
+include_directories( 
+    ${DEPS_DIR}
+    ${PROJECT_SOURCE_DIR}
+) 
 
 target_link_libraries(game_server PUBLIC ${LIBRARIES}) 
-

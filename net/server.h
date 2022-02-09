@@ -2,17 +2,14 @@
 
 #include "asio.hpp"
 
-using asio::ip::address;
-using asio::ip::tcp;
-
 namespace net {
 class server
 {
 public:
-	server(asio::io_context& io_context, const tcp::endpoint& endpoint);
+	server(asio::io_context& io_context, const asio::ip::tcp::endpoint& endpoint);
 	void accept();
 
 private:
-	tcp::acceptor acceptor_;
+	//asio::ip::tcp::acceptor acceptor_;
 };
 }

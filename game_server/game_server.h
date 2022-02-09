@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "design_pattern/singleton.h"
-#include "net.h"
+#include "mtl/design_pattern/singleton.h"
+#include "net/net.h"
 
 class game_server 
 	: public mtl::singleton<game_server>

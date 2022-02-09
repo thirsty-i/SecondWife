@@ -1,7 +1,8 @@
-﻿#include "platform.h"
-#include "game_server.h"
-#include "logger/log.h"
-#include "server.h"
+﻿#include "game_server.h"
+#include "net/server.h"
+
+#include "../deps/asio.hpp"
+#include "../deps/asio/io_context.hpp"
 
 game_server::game_server()
 {
@@ -14,19 +15,15 @@ bool game_server::start()
 	return true;
 }
 
+using asio::ip::address;
+using asio::ip::tcp;
+
 bool game_server::_start_nets()
 {
+	asio::io_context io_context(0);
+	tcp::endpoint endpoint(address::from_string("127.0.0.1"), 8080);
+	net::server server(io_context, endpoint);
+
 	return true;
 }
 
-INITIALIZE_EASYLOGGINGPP
-int main()
-{
-	g_init_log(game_server::instance().server_name());
-	
-	asio::io_context io_context(0);
-	tcp::endpoint endpoint(address::from_string("127.0.0.1"), 8080);
-	net::server(io_context, endpoint);
-
-	return 0;
-}
