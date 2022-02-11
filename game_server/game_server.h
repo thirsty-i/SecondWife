@@ -13,8 +13,8 @@ public:
 	inline const char* server_name() { return "game_server"; }
 	bool start();
 private:
-	bool _start_nets();
 private:
 	//service service_;
+	net net_;
 	friend class mtl::singleton<game_server>;
 };

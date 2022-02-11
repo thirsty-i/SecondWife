@@ -10,6 +10,6 @@ public:
 	void accept();
 
 private:
-	//asio::ip::tcp::acceptor acceptor_;
+	asio::ip::tcp::acceptor acceptor_;
 };
 }
