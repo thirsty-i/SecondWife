@@ -3,7 +3,6 @@
 
 using asio::ip::address;
 using asio::ip::tcp;
-
 server::server(asio::io_context& io_context, const tcp::endpoint& endpoint)
 	: acceptor_(io_context, endpoint)
 {

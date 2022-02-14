@@ -162,7 +162,7 @@ namespace mtl
 		void _put_node(node_ptr node)
 		{
 			node_allocator_.destroy(node);
-			node_allocator_.deallocate(node);
+			node_allocator_.deallocate(node, 1);
 		}
 
 		iterator _find(key_type& key)

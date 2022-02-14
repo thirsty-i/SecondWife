@@ -6,7 +6,7 @@ net::net()
 
 }
 
-~net::net()
+net::~net()
 {
     if(thread_->joinable())
         thread_->join();
