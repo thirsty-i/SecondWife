@@ -353,12 +353,13 @@ namespace mtl
 					if ((brother->left && brother->left->color == _Rb_tree_color::rbtcRed) ||
 						brother->right && brother->right->color == _Rb_tree_color::rbtcRed)
 					{
-						// left child is red node
-						if (brother->left && brother->left->color == _Rb_tree_color::rbtcRed)
+						// Use the right son first
+						//if (brother->left && brother->left->color == _Rb_tree_color::rbtcRed)
+						if(!brother->right || brother->right->color == _Rb_tree_color::rbtcBlack)
 						{
 							_rotate_right(brother);
 							brother = brother->parent;
-							brother->color = _Rb_tree_color::rbtcBlack;
+							//brother->color = _Rb_tree_color::rbtcBlack;
 						}
 						else
 							brother->right->color = _Rb_tree_color::rbtcBlack;
@@ -390,11 +391,13 @@ namespace mtl
 					if ((brother->left && brother->left->color == _Rb_tree_color::rbtcRed) ||
 						brother->right && brother->right->color == _Rb_tree_color::rbtcRed)
 					{
-						if (brother->right && brother->right->color == _Rb_tree_color::rbtcRed)
+						// Use the left son first
+						//if (brother->right && brother->right->color == _Rb_tree_color::rbtcRed)
+						if(!brother->left || brother->left->color == _Rb_tree_color::rbtcBlack)
 						{
 							_rotate_left(brother);
 							brother = brother->parent;
-							brother->color = _Rb_tree_color::rbtcBlack;
+							//brother->color = _Rb_tree_color::rbtcBlack;
 						}
 						else
 							brother->left->color = _Rb_tree_color::rbtcBlack;

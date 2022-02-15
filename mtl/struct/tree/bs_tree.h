@@ -69,7 +69,7 @@ namespace mtl
 			if (node == 0)
 				return 0;
 
-			const_pointer tmp = node;
+			pointer tmp = node;
 			while (tmp->left)
 				tmp = tmp->left;
 			return tmp;
@@ -80,7 +80,7 @@ namespace mtl
 			if (node == 0)
 				return 0;
 
-			const_pointer tmp = node;
+			pointer tmp = node;
 			while (tmp->right)
 				tmp = tmp->right;
 			return tmp;
