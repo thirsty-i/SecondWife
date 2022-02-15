@@ -27,5 +27,7 @@ bool game_server::start()
 
 	map.print_tree();
 
+	int a = 10;
+
 	return true;
 }
