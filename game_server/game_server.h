@@ -15,6 +15,5 @@ public:
 private:
 private:
 	//service service_;
-	net net_;
 	friend class mtl::singleton<game_server>;
 };

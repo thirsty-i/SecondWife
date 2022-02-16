@@ -1,28 +1,35 @@
 #include "net.h"
 
+
 net::net()
     : io_context_(1)
+    , session_pool_(1024)
 {
 
 }
 
 net::~net()
 {
-    if(thread_->joinable())
+    if(thread_ && thread_->joinable())
         thread_->join();
-}
-
-
-void net::create_acceptor(const char* address, uint32_t port)
-{
     
 }
 
-
-void net::connect(const char* address, uint32_t port)
+socket_acceptor::pointer net::create_acceptor()
 {
-
+    acceptors_.push_back(std::make_shared<socket_acceptor>(io_context_));
+    return acceptors_.back();
 }
+
+socket_session::pointer net::create_session()
+{
+    return session_pool_.create();
+}
+
+// asio::ip::tcp::socket* net::connect(const char* address, uint32_t port)
+// {
+
+// }
 
 void net::start()
 {

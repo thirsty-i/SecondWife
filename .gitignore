@@ -32,6 +32,7 @@ bld/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
+[Bb]uild/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -361,46 +362,3 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-build/.ninja_deps
-build/.ninja_log
-build/build.ninja
-build/cmake_install.cmake
-build/CMakeCache.txt
-build/compile_commands.json
-build/rules.ninja
-build/.cmake/api/v1/query/client-vscode/query.json
-build/.cmake/api/v1/reply/cache-v2-2b78560eda379bae4de2.json
-build/.cmake/api/v1/reply/codemodel-v2-cba256b3c57e3ded7759.json
-build/.cmake/api/v1/reply/index-2022-02-09T13-19-56-0219.json
-build/.cmake/api/v1/reply/target-common-Debug-e78fe58a01d402981cb3.json
-build/.cmake/api/v1/reply/target-game_server-Debug-450a173bde23670ed4da.json
-build/.cmake/api/v1/reply/target-net-Debug-5bcece5c9fbbcdc9cd69.json
-build/CMakeFiles/cmake.check_cache
-build/CMakeFiles/TargetDirectories.txt
-build/CMakeFiles/3.16.3/CMakeCCompiler.cmake
-build/CMakeFiles/3.16.3/CMakeCXXCompiler.cmake
-build/CMakeFiles/3.16.3/CMakeDetermineCompilerABI_C.bin
-build/CMakeFiles/3.16.3/CMakeDetermineCompilerABI_CXX.bin
-build/CMakeFiles/3.16.3/CMakeSystem.cmake
-build/CMakeFiles/3.16.3/CompilerIdC/a.out
-build/CMakeFiles/3.16.3/CompilerIdC/CMakeCCompilerId.c
-build/CMakeFiles/3.16.3/CompilerIdCXX/a.out
-build/CMakeFiles/3.16.3/CompilerIdCXX/CMakeCXXCompilerId.cpp
-build/common/cmake_install.cmake
-build/common/libcommon.a
-build/common/CMakeFiles/common.dir/logger/log.cpp.o
-build/game_server/cmake_install.cmake
-build/game_server/game_server
-build/game_server/CMakeFiles/game_server.dir/game_server.cpp.o
-build/game_server/CMakeFiles/game_server.dir/main.cpp.o
-build/net/cmake_install.cmake
-build/net/libnet.a
-build/net/CMakeFiles/net.dir/net.cpp.o
-build/net/CMakeFiles/net.dir/server.cpp.o
-build/net/CMakeFiles/net.dir/session_mgr.cpp.o
-build/.cmake/api/v1/reply/index-2022-02-09T13-45-21-0471.json
-build/.cmake/api/v1/reply/cache-v2-07a6e899f7d02f275250.json
-build/.cmake/api/v1/reply/codemodel-v2-928d735dff4ebd8450f0.json
-build/.cmake/api/v1/reply/index-2022-02-15T12-55-46-0530.json
-build/.cmake/api/v1/reply/target-game_server-Debug-03ca60a52f4bc2ffd0e6.json
-build/.cmake/api/v1/reply/target-net-Debug-48aaf44a16b255c72751.json
