@@ -18,8 +18,8 @@ public:
     ~net();
     // asio::ip::tcp::acceptor* create_acceptor(const char* address, uint32_t port);
     // asio::ip::tcp::socket* connect(const char* address, uint32_t port);
-    socket_acceptor::pointer create_acceptor();
-    socket_session::pointer  create_session();
+    socket_acceptor_ptr create_acceptor();
+    socket_session_ptr  create_session();
 
     void start();
 
@@ -33,5 +33,5 @@ private:
     friend class mtl::singleton<net>;
 
     mtl::object_pool<socket_session> session_pool_;
-    std::vector<socket_acceptor::pointer> acceptors_;
+    std::vector<socket_acceptor_ptr> acceptors_;
 };

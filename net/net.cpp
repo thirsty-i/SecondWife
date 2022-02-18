@@ -1,6 +1,5 @@
 #include "net.h"
 
-
 net::net()
     : io_context_(1)
     , session_pool_(1024)
@@ -15,13 +14,13 @@ net::~net()
     
 }
 
-socket_acceptor::pointer net::create_acceptor()
+socket_acceptor_ptr net::create_acceptor()
 {
     acceptors_.push_back(std::make_shared<socket_acceptor>(io_context_));
     return acceptors_.back();
 }
 
-socket_session::pointer net::create_session()
+socket_session_ptr net::create_session()
 {
     return session_pool_.create();
 }

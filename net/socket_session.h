@@ -6,9 +6,11 @@
 class socket_session
 {
 public:
-    using pointer = std::shared_ptr<socket_session>;
+    void set_message_handler(const message_handler_ptr& handler)
+    { handlers_ = handler; }
 
-    void set_message_handler(message_handler* handler);
 private:
-    message_handler* handlers_;
+    message_handler_ptr handlers_;
 };
+
+typedef std::shared_ptr<socket_session> socket_session_ptr;

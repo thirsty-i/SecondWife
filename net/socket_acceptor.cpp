@@ -18,16 +18,10 @@ void socket_acceptor::start(const char* address, uint32_t port)
 	acceptor_.open(endpoint.protocol());
 	acceptor_.bind(endpoint);
 	acceptor_.listen();
-	accept();
+	_accept();
 }
 
-void socket_acceptor::set_message_handler(message_handler* handler)
-{
-	LOG_PROCESS_ERROR(handler);
-	handlers_ = handler;
-}
-
-void socket_acceptor::accept()
+void socket_acceptor::_accept()
 {
 	acceptor_.async_accept(
 		[this](std::error_code ec, tcp::socket socket)
@@ -38,10 +32,14 @@ void socket_acceptor::accept()
 				return;
 			}
 
-			socket_session::pointer new_session = net::instance().create_session();
-			new_session->set_message_handler(handlers_);
+
+			socket_session_ptr new_session = net::instance().create_session();
+			new_session->set_message_handler(message_handler_);
 			sessions_.insert(new_session);
 
-			accept();
+			if(new_connection_callback_)
+				new_connection_callback_(new_session);
+
+			_accept();
 		});
 }
