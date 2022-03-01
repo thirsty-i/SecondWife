@@ -6,3 +6,4 @@ struct user_session_base
 {
     socket_session_ptr session;
 };
+

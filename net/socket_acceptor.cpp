@@ -1,8 +1,7 @@
 #include "socket_acceptor.h"
-#include <iostream>
-#include "common/logger/log.h"
 #include "socket_session.h"
 #include "net.h"
+#include "common/logger/log.h"
 
 using asio::ip::address;
 using asio::ip::tcp;
@@ -28,14 +27,11 @@ void socket_acceptor::_accept()
 		{
 			if (!ec)
 			{
-				std::cout << "enter aysnc_accept complete call function" << std::endl;
+				LOG(ERROR) << "enter aysnc_accept complete call function";
 				return;
 			}
 
-
 			socket_session_ptr new_session = net::instance().create_session();
-			new_session->set_message_handler(message_handler_);
-			//sessions_.insert(new_session);
 
 			if(new_connection_callback_)
 				new_connection_callback_(new_session);
