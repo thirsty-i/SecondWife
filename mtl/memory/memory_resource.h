@@ -1,9 +1,9 @@
 #pragma once 
 
 #include <cstddef>
-#include "../common/bitops.h"
-#include "../common/logger/log.h"
-#include "../common/noncopyable.h"
+#include "common/bitops.h"
+#include "common/logger/log.h"
+#include "common/noncopyable.h"
 
 class memory_resource
 {

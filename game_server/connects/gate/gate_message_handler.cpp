@@ -1,5 +1,5 @@
 #include "gate_message_handler.h"
-#include "../services/gate_service.h"
+#include "gate_net.h"
 
 gate_message_handler::gate_message_handler(gate_service* service)
     : service_(service)
@@ -24,10 +24,4 @@ void gate_message_handler::on_recv()
 void gate_message_handler::on_disconnected()
 {
 
-}
-
-// 客户端service 类
-void cli_message_handler::do_cli_move(const char* msg, size_t size)
-{
-    gate_service::instance().message_handler().do_forward(msg, size);
 }

@@ -1,5 +1,4 @@
 ﻿#include "game_server.h"
-#include "net/server.h"
 #include "asio.hpp"
 
 #include "mtl/struct/tree/map.h"

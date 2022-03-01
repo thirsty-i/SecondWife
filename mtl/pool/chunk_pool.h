@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../memory/chunk.h"
-#include "../memory/memory_resource.h"
-#include "../memory/allocator.h"
+#include "mtl/memory/chunk.h"
+#include "mtl/memory/memory_resource.h"
+#include "mtl/memory/allocator.h"
 
 namespace mtl {
 class chunk_pool
@@ -30,7 +30,7 @@ public:
 			return p;
 
 		_fill();
-		return chunks_.back().pop();
+		return chunks_.empty() ? NULL : chunks_.back().pop();
 	}
 
 	void deallocate(void* ptr)
@@ -116,7 +116,7 @@ private:
 			&& std::is_nothrow_move_assignable<chunk_t>::value)
 	{
 		if (chunks_.empty())
-			return 0;
+			return NULL;
 
 		chunk_t& free_chunk = chunks_.back();
 		if (void* p = free_chunk.pop())
@@ -124,7 +124,7 @@ private:
 
 		// no more blocks
 		if (chunks_.size() == 1)
-			return 0;
+			return NULL;
 
 		void* p = 0;
 		for (chunk_t& chunk : chunks_)
@@ -146,7 +146,7 @@ private:
 	size_t block_size_;
 	size_t blocks_;
 	size_t recycle_rate_;
-	std::vector<chunk_t> chunks_; // ÕâÀïÒª´«Ò»¸öÐ¡ÄÚ´æ·ÖÅäÆ÷???
+	std::vector<chunk_t> chunks_; // ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½Ò»ï¿½ï¿½Ð¡ï¿½Ú´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???
 	memory_resource* resource_;
 };
 };

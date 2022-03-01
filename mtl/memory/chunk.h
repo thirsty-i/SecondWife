@@ -51,6 +51,7 @@ namespace mtl {
 		{
 			LOG_PROCESS_ERROR_RET(ptr, false);
 			LOG_PROCESS_ERROR_RET(!full(), false);
+			LOG_PROCESS_ERROR_RET(!is_from(ptr), false);
 
 			link_node* node = static_cast<link_node*>(ptr);
 			node->next = head_;
