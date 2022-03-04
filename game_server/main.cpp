@@ -1,5 +1,5 @@
-#include "common/logger/log.h"
 #include "game_server.h"
+#include "common/logger/log.h"
 
 INITIALIZE_EASYLOGGINGPP
 int main()

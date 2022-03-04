@@ -2,6 +2,7 @@
 #include "socket_session.h"
 #include "net.h"
 #include "common/logger/log.h"
+#include "asio.hpp"
 
 using asio::ip::address;
 using asio::ip::tcp;
@@ -22,20 +23,18 @@ void socket_acceptor::start(const char* address, uint32_t port)
 
 void socket_acceptor::_accept()
 {
-	acceptor_.async_accept(
-		[this](std::error_code ec, tcp::socket socket)
-		{
-			if (!ec)
-			{
-				LOG(ERROR) << "enter aysnc_accept complete call function";
-				return;
-			}
+	socket_session_ptr new_session = net::instance().create_session();
+	acceptor_.async_accept(new_session->socket(), std::bind(&socket_acceptor::_accept_handler, this, new_session, std::placeholders::_1));
+}
 
-			socket_session_ptr new_session = net::instance().create_session();
+void socket_acceptor::_accept_handler(socket_session_ptr new_session, std::error_code ec)
+{
+	LOG_PROCESS_ERROR(!ec);
 
-			if(new_connection_callback_)
-				new_connection_callback_(new_session);
+	LOG(DEBUG) << "new_session:" << &new_session;
 
-			_accept();
-		});
+	if (new_connection_callback_)
+		new_connection_callback_(new_session);
+
+	_accept();
 }

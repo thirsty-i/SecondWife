@@ -146,7 +146,7 @@ private:
 	size_t block_size_;
 	size_t blocks_;
 	size_t recycle_rate_;
-	std::vector<chunk_t> chunks_; // ����Ҫ��һ��С�ڴ������???
+	std::vector<chunk_t> chunks_;
 	memory_resource* resource_;
 };
 };

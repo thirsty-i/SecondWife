@@ -5,10 +5,6 @@ cmake_minimum_required (VERSION 3.8)
 
 project ("SecondWife")
 
-set(CXX_FLAGS
- -std=c++11
-)
-
 set(DEPS_DIR 
 ${CMAKE_SOURCE_DIR}/deps
 ${CMAKE_SOURCE_DIR}/deps/asio
@@ -19,3 +15,4 @@ ${CMAKE_SOURCE_DIR}/deps/asio
 add_subdirectory("common")
 add_subdirectory("net")
 add_subdirectory ("game_server")
+

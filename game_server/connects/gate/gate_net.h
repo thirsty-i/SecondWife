@@ -1,25 +1,22 @@
 #pragma once
 
-#include "net/server_net_base.h"
+#include "net/socket_net_basic.h"
 #include "net/socket_acceptor.h"
 #include "mtl/design_pattern/singleton.h"
 #include "gate_message_handler.h"
 
-class role
-    : public user_session_base
-{
-public:
-};
 
 class gate_net final
-    : public server_net_base<role, gate_message_handler>
+    : public socket_net_basic<role, gate_message_handler>
     , public mtl::singleton<gate_net>
 {
 public:
     gate_net();
+    void send(user_session_ptr r, std::shared_ptr<msg_header> msg);
+    void start();
 private:
-    _on_new_connection(socket_session_ptr& new_session);
-    _on_close(socket_acceptor_ptr session);
+    void _on_new_connection(socket_session_ptr new_session);
+    void _on_close(socket_session_ptr session);
 private:
     socket_acceptor_ptr socket_acceptor_;
 private:

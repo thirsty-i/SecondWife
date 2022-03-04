@@ -4,7 +4,11 @@
 cmake_minimum_required (VERSION 3.8)
 
 # 将源代码添加到此项目的可执行文件。
-add_executable (game_server "game_server.cpp" "main.cpp")
+add_executable (game_server 
+"game_server.cpp" 
+"main.cpp" 
+"connects/gate/gate_net.cpp"
+"connects/gate/gate_message_handler.cpp")
 
 set(LIBRARIES  
     common
@@ -17,8 +21,6 @@ set(LIBS_PATH
 
 message(111${PROJECT_SOURCE_DIR})
 
-target_compile_options(game_server PUBLIC -DASIO_STANDALONE)
-
 list(APPEND LIBRARIES -pthread)
 list(APPEND LIBRARIES ${LIBS_PATH}libtcmalloc_minimal${CMAKE_STATIC_LIBRARY_SUFFIX})
 
@@ -28,3 +30,4 @@ include_directories(
 ) 
 
 target_link_libraries(game_server PUBLIC ${LIBRARIES}) 
+

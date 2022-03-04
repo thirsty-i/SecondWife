@@ -22,7 +22,7 @@ socket_acceptor_ptr net::create_acceptor()
 
 socket_session_ptr net::create_session()
 {
-    return session_pool_.create();
+    return session_pool_.create(io_context_);
 }
 
 // asio::ip::tcp::socket* net::connect(const char* address, uint32_t port)
