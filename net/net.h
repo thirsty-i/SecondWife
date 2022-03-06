@@ -15,23 +15,26 @@ class net final
 private:
     net();
 public:
+    using event_t = std::function<void(void)>;
     ~net();
-    // asio::ip::tcp::acceptor* create_acceptor(const char* address, uint32_t port);
-    // asio::ip::tcp::socket* connect(const char* address, uint32_t port);
     socket_acceptor_ptr create_acceptor();
-    socket_session_ptr  create_session();
+
+    socket_session_ptr create_session();
 
     void start();
 
     asio::io_context& get_context() { return io_context_; }
-    
+
+    void push_event(event_t&& event);
+    bool pop_event(event_t& event);
+    void main_loop();
 private:
     asio::io_context io_context_;
     std::unique_ptr<std::thread> thread_;
-    //mtl::queue<>
-
-    friend class mtl::singleton<net>;
-
+    mtl::queue<event_t> event_queue_;
     mtl::object_pool<socket_session> session_pool_;
     std::vector<socket_acceptor_ptr> acceptors_;
+
+private:
+	friend class mtl::singleton<net>;
 };

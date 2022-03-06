@@ -31,10 +31,10 @@ void socket_acceptor::_accept_handler(socket_session_ptr new_session, std::error
 {
 	LOG_PROCESS_ERROR(!ec);
 
-	LOG(DEBUG) << "new_session:" << &new_session;
-
-	if (new_connection_callback_)
-		new_connection_callback_(new_session);
+	net::instance().push_event([new_session, this] {
+		if (new_connection_callback_)
+			new_connection_callback_(new_session);
+	});
 
 	_accept();
 }

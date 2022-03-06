@@ -12,11 +12,9 @@ class gate_net final
 {
 public:
     gate_net();
-    void send(user_session_ptr r, std::shared_ptr<msg_header> msg);
-    void start();
+    //void send(user_session_ptr r, std::shared_ptr<msg_header> msg);
+    bool start();
 private:
-    void _on_new_connection(socket_session_ptr new_session);
-    void _on_close(socket_session_ptr session);
 private:
     socket_acceptor_ptr socket_acceptor_;
 private:

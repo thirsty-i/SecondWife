@@ -2,7 +2,7 @@
 
 #include "msg_def.h"
 
-enum class t2g_message_id
+enum class t2g_message_id : uint32_t
 {
 	message_begin = t2g_message_begin,
 

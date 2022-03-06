@@ -17,7 +17,7 @@ public:
 	using msg_t = MsgType;
 
 	using user_session_ptr = std::shared_ptr<user_session_t>;
-	using msg_ptr = std::shared_ptr<msg_header>;
+	using msg_ptr = msg_header*;
 
 	using message_func_t = std::function<void(user_session_ptr, msg_ptr)>;
 

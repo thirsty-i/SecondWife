@@ -6,7 +6,6 @@
 
 game_server::game_server()
 {
-	start();
 }
 
 bool game_server::start()
@@ -15,6 +14,9 @@ bool game_server::start()
 	net::instance().start();
 
 	while (true)
-		;
+	{
+		net::instance().main_loop();
+	};
+
 	return true;
 }

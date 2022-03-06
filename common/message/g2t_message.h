@@ -2,11 +2,11 @@
 
 #include "msg_def.h"
 
-enum class g2t_message_id
+enum class g2t_message_id : uint32_t
 {
 	message_begin = g2t_message_begin,
 
-	g2c_test_net,
+	g2t_test_net,
 
 	message_total,
 
@@ -14,7 +14,7 @@ enum class g2t_message_id
 static_assert((size_t)g2t_message_id::message_total <= (size_t)g2t_message_end, "message_total <= g2t_message_end");
 
 #pragma pack(push, 1)
-struct g2c_test_net : msg_header
+struct g2t_test_net : msg_header
 {
 	int32_t magic_code;
 };
