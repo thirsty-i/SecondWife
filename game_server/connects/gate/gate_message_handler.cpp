@@ -11,7 +11,7 @@ gate_message_handler::gate_message_handler()
 		std::bind(&gate_message_handler::_on_test_net_msg, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-
+// FIXME: Generate code with tools
 void gate_message_handler::do_test_net(user_session_ptr session, int32_t magic_code)
 {
 	buffer_ptr buf = std::make_shared<buffer>(sizeof(g2t_test_net));

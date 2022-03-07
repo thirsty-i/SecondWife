@@ -41,7 +41,6 @@ private:
 	void _read_message();
 
 	void _close_event();
-	void _recv_event(std::unique_ptr<char[]>&& buffer);
 	void _read_message_size();
 private:
 	recv_callback_t recv_callback_;
